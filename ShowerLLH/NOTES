@@ -1,0 +1,13 @@
+# Plan - write time scrambling script with option to not overwrite existing
+# files, include IT81 files.
+#
+# Email Nils about setting up a VPN
+#
+# Look into setting up a python style for official plots (changing font sizes
+# for title and axes, etc)
+#
+# Combine log-likelihoods with a LLH1 - x*LLH2 where x determines the relative
+# strength of the two parameters
+#
+# Kyle's suggestion - weight each particle by the percent chance it's proton or
+# iron, and deposit into each composition map appropriately.

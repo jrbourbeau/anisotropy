@@ -1,0 +1,12 @@
+AddToFrame.py
+ - frame writer for use in I3Tray that performs grid search
+
+MakeLLHFiles.py
+ - runs grid search on simulation or data
+ - puts ShowerLLH information into hdf5 output file
+
+maker
+ - runs appropriate program en masse
+
+Save_Sim.py
+ - extracts desired information from hdf5 files and stores as pkl dictionary

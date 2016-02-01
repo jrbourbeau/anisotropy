@@ -1,0 +1,2 @@
+Error in <TSystem::ExpandFileName>: input: $HOME/.root.mimes, output: $HOME/.root.mimes
+WARN (I3TableTranscriber): Input file contains no events, skipping file... (I3TableTranscriber.cxx:48 in I3TableTranscriber::I3TableTranscriber(I3TableServicePtr, I3TableServicePtr))

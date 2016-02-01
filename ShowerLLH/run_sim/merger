@@ -1,0 +1,21 @@
+#!/bin/bash
+
+###############################################################################
+# Uses python scripts written by Jakob to combine hdf5 files                  #
+# merge.py: combines two or more files with the same cols, different events   #
+# mix.py:   combines two or more files with the same events, different cols   #
+###############################################################################
+
+prefix="/data/user/zgriffith/ShowerLLH/IT81_sim/files"
+#prefix="/data/user/zgriffith/ShowerLLH/IT73_sim/files"
+I3="/data/user/zgriffith/offline/build"
+simList="9166"
+#simList="11644"
+#simList="7007"
+
+for sim in ${simList}; do
+  fileList="${prefix}/SimLLH_${sim}_part*.hdf5"
+  outfile="${prefix}/SimLLH_${sim}.hdf5"
+  python "${I3}/hdfwriter/resources/scripts/merge.py" "-o" "$outfile" $fileList
+  #python "${I3}/hdfwriter/resources/scripts/mix.py" "${prefix}/SimLLH_${sim}.hdf5" "${prefix}/SimLLH_${sim}.hdf5"
+done

@@ -1,0 +1,14 @@
+Working on /net/user/fmcnally/ShowerLLH/IT81_data/files/DataLLH_201105.hdf5
+Traceback (most recent call last):
+  File "save_data.py", line 196, in <module>
+    saver(config, yyyymm)
+  File "save_data.py", line 133, in saver
+    q['lap_'+value] = t.root.Laputop.col(value)
+  File "/cvmfs/icecube.wisc.edu/standard/RHEL_6_x86_64/lib/python2.7/site-packages/tables/group.py", line 813, in __getattr__
+    return self._f_get_child(name)
+  File "/cvmfs/icecube.wisc.edu/standard/RHEL_6_x86_64/lib/python2.7/site-packages/tables/group.py", line 683, in _f_get_child
+    self._g_check_has_child(childname)
+  File "/cvmfs/icecube.wisc.edu/standard/RHEL_6_x86_64/lib/python2.7/site-packages/tables/group.py", line 407, in _g_check_has_child
+    % (self._v_pathname, name))
+tables.exceptions.NoSuchNodeError: group ``/`` does not have a child named ``Laputop``
+Closing remaining open files: /net/user/fmcnally/ShowerLLH/IT81_data/files/DataLLH_201105.hdf5... done

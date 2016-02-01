@@ -1,0 +1,21 @@
+Tue Mar  3 09:55:58 CST 2015
+uwa009.icecube.wisc.edu
+************************************************************************
+*                                                                      *
+*                   W E L C O M E  to  I C E T R A Y                   *
+*                                                                      *
+*       Version offline-software.releases.V14-11-00     r128791        *
+*                                                                      *
+*                You are welcome to visit our Web site                 *
+*                        http://icecube.umd.edu                        *
+*                                                                      *
+************************************************************************
+
+Icetray environment has:
+   I3_SRC       = /data/user/zgriffith/offline/src
+   I3_BUILD     = /data/user/zgriffith/offline/build
+   I3_PORTS     = /cvmfs/icecube.opensciencegrid.org/standard/RHEL_6_x86_64/i3ports
+   I3_TESTDATA  = /cvmfs/icecube.opensciencegrid.org/standard/RHEL_6_x86_64/i3ports/test-data
+   Python       = Python 2.7.3
+Exited Icetray Environment.
+Tue Mar  3 10:09:32 CST 2015

@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+
+from numpy import *
+import tables, sys, time
+from useful import inPoly
+
+def load_data():
+
+    # Load data from npy file 
+    t0 = time.time()
+    prefix = '/net/user/fmcnally/ShowerLLH/'
+    d = load(prefix + 'IT73_data/DataPlot.npy')
+    d = d.item()
+    print 'Time taken:', time.time()-t0
+
+    # Set array types
+    bools = ['p', 'f']
+    for key in bools:
+        d[key] = d[key].astype('bool')
+    for weight in d['weights'].keys():
+        d['weights'][weight] = d['weights'][weight].astype('bool')
+
+    ## Quality Cuts ##
+    d['cuts'] = {}
+
+    # ShowerLLH cuts
+    d['cuts']['llh1'] = (d['SubEventStream'] == 0)
+    d['cuts']['llh2'] = inPoly(d['ML_x'], d['ML_y'], -50, config='IT73')
+    d['cuts']['llh']  = d['cuts']['llh1'] * d['cuts']['llh2']
+
+    # Laputop cuts
+    d['cuts']['lap1'] = (cos(d['lap_zenith']) >= 0.8)
+    d['cuts']['lap2'] = inPoly(d['lap_x'], d['lap_y'], -90)
+    d['cuts']['lapE'] = (d['lap_e_proton']==d['lap_e_proton'])
+    d['cuts']['lapE']*= (d['lap_e_proton']!=0)
+    d['cuts']['lap']  = d['cuts']['lap1']*d['cuts']['lap2']*d['cuts']['lapE']
+
+    return d
+
+
+if __name__ == "__main__":
+
+    d = load_data()
+
+

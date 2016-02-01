@@ -1,0 +1,3 @@
+Error in <TSystem::ExpandFileName>: input: $HOME/.root.mimes, output: $HOME/.root.mimes
+ERROR (I3HDFTable): (CleanedHLCTankPulses) error reading rows 0--3970 (I3HDFTable.cxx:472 in I3TableRowPtr I3HDFTable::ReadRowsFromTable(size_t, size_t) const)
+./merger: line 13:  6083 Segmentation fault      python "${I3}/hdfwriter/resources/scripts/merge.py" "-o" "$outfile" $fileList

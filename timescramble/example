@@ -1,0 +1,1 @@
+./timeScramble --config IT73 --outbase IT73_int-24_filter-STA8 --filter STA8 --integrationtime 24 --batchfile /data/user/jbourbeau/anisotropy/stripped-data/IT73-data/files.txt --method Sidereal --datapath /data/user/jbourbeau/anisotropy/stripped-data/IT73-data/ --ebins 0 100

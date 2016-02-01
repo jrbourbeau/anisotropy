@@ -1,0 +1,14 @@
+/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-05-12.root
+/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-07-20.root
+/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-08-09.root
+/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-08-31.root
+/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-09-01.root
+/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-09-04.root
+/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-09-05.root
+/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-09-06.root
+/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-09-08.root
+/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-09-09.root
+/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-09-10.root
+/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-11-16.root
+/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-11-24.root
+/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-11-25.root

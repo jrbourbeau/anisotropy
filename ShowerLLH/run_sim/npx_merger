@@ -1,0 +1,32 @@
+#!/bin/bash
+
+###############################################################################
+# Uses python scripts written by Jakob to combine hdf5 files                  #
+# merge.py: combines two or more files with the same cols, different events   #
+# mix.py:   combines two or more files with the same events, different cols   #
+###############################################################################
+
+prefix="/data/user/zgriffith/ShowerLLH/IT73_sim/files"
+I3="/home/zgriffith/icetray/V13_03/build"
+simList="7006"
+
+cd "/home/zgriffith/npx4"
+
+job=0
+
+
+for sim in ${simList}; do
+    while [ $job -lt 30 ]; do
+        #if [ $job -eq 6 ] || [ $job -eq 19 ]; then
+        job_str=$( printf '%02d' $job )
+        echo $job_str
+        #fileList="${prefix}/SimLLH_${sim}_part0$job_str*"
+        fileList="${prefix}/SimLLH_${sim}_$job_str.hdf5"
+        #outfile="${prefix}/SimLLH_${sim}_$job_str.hdf5"
+        outfile="${prefix}/SimLLH_${sim}.hdf5"
+        ./submit_npx4.sh /data/user/zgriffith/offline/build/env-shell.sh python "${I3}/hdfwriter/resources/scripts/merge.py" "-o" "$outfile" $fileList
+        #fi
+        job=$((job + 1))
+    done
+  #python "${I3}/hdfwriter/resources/scripts/mix.py" "${prefix}/SimLLH_${sim}.hdf5" "${prefix}/SimLLH_${sim}.hdf5"
+done
