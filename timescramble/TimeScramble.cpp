@@ -391,10 +391,14 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 	
 	double percent_completed_indicator = 0;
 	int progress_bar_width = 70;
-
+	
+	ofstream alifile;
+	alifile.open ("ali_times.txt");
 	for (Long64_t jentry = 0; jentry < nEntries; ++jentry) {
 		
 		cutDST->GetEntry(jentry);
+
+		alifile << "time = " << dst.ModJulDay << endl;
 
 		// Print progress bar to the console
 		if (double(jentry)/nEntries >= percent_completed_indicator) {
@@ -553,6 +557,7 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 			}
 		}
 	} // End of jentry loop
+	alifile.close();
   
 	for (unsigned int m=0; m<nMaps; ++m) {
 

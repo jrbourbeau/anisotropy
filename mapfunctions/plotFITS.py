@@ -237,10 +237,10 @@ if __name__ == "__main__":
         args.max = '%.2f' % max
 
     # Setup colormap with option for threshold
-    #colormap = plt.get_cmap('jet')
+    colormap = plt.get_cmap('jet')
     #colormap = cmap_discretize(plt.get_cmap('jet'),[-1.0,-0.5,0.0,0.5,1.0])
     #colormap = plt.get_cmap('seismic')
-    colormap = plt.get_cmap('coolwarm')
+    #colormap = plt.get_cmap('coolwarm')
     #colormap = cmaps.viridis
     if args.threshold:
         colormap = SetupAbsThresholdColormap(min, max, args.threshold)
@@ -312,6 +312,7 @@ if __name__ == "__main__":
     if not args.title:
         ax.set_title(title, visible=False)
     if args.half:
+        #ax.set_ylim(-1, 0.5)
         ax.set_ylim(-1, 0.005)
         if args.llabel:
             lbl = '%s %s' % (args.llabel[:-3], args.llabel[-3:])

@@ -126,6 +126,7 @@ def multifit(l, data, bg, alpha, **kwargs):
                 'decmax':-25, 'decmin':-90}
     opts = {k:kwargs[k] for k in kwargs if k in defaults}
     opts.update({k:defaults[k] for k in defaults if k not in opts})
+    #print('opts = {}'.format(opts))
 
     npix = len(data)
     #print('npix = {}'.format(npix))
