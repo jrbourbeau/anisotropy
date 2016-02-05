@@ -81,7 +81,7 @@ if __name__ == "__main__":
     parser.add_argument('-v', '--verbose', action='store_true', dest='verbose',
             default=False, help='Verbose output')
     parser.add_argument('--params', action='store_true', dest='params',
-            default=False, help='Print params')
+            default=True, help='Print params')
     parser.add_argument('--usefit', action='store_true', dest='usefit',
             default=False, help='Use spherical harmonic fits instead of raw data')
     parser.add_argument('--plotname', dest='plotname',
@@ -100,145 +100,41 @@ if __name__ == "__main__":
     energy_err_lower = [0.62, 0.65, 0.68, 0.73, 0.74, 0.75, 0.6, 0.52, 0.46]
     energy_err_upper = [0.5, 0.54, 0.55, 0.64, 0.72, 0.78, 0.83, 0.63, 0.58]
 
-    # Right ascension projection of relative intensity map
-    data, bg, local = hp.read_map(maps[0][0], range(3),verbose=False)
-    nside = hp.get_nside(data)
-    dec, ra = hp.pix2ang(nside,[i for i in range(hp.nside2npix(nside))])
-    rad2deg = 180./np.pi
-    deg2rad = np.pi/180.
-    dec = np.array([rad2deg*i for i in dec])
-    decmin = 115.
-    decmax = 180.
-    deccut = (dec >= decmin)*(dec <= decmax)
-    ra = np.array([rad2deg*i for i in ra])
-    dipole_avg = []
-    phase_avg = []
-    fig = plt.figure(0)
-    num_bands = 24.
-    for j in range(len(maps)):
-        dI = []
-        angle = []
-        if len(maps[j]) == 1:
-            data, bg, local = hp.read_map(maps[j][0], range(3),verbose=False)
-        else:
-            data, bg, local = np.sum([hp.read_map(f, range(3), verbose=False)\
-                    for f in maps[j]], axis=0)
-        for i in range(int(num_bands)):
-            if args.usefit:
-                relint = multifit(args.lmax, data, bg, alpha, **opts)
-            else:
-                with np.errstate(invalid='ignore'):
-                    relint = (data - bg) / bg
-                relint[np.isnan(relint)] = 0.
-            
-            # Right ascension cut 
-            ramin = (360./num_bands)*i
-            ramax = (360./num_bands)*(i+1)
-            racut = (ra >= ramin)*(ra <= ramax)
-
-            #hp.write_map("racut.fits", [data, bg, local])
-            n_pix = (racut*deccut).sum()
-            #print('n_pix = {}'.format(n_pix))
-            relint[np.logical_not(racut)] = 0.0 
-            relint[np.logical_not(deccut)] = 0.0 
-            dI.append(relint.sum()/n_pix)
-            angle.append(ramin+((360./num_bands)/2.))
-        
-        anglemin = min(angle)
-        anglemax = max(angle)
-
-        def relint_avg(x):
-            for i in range(int(num_bands)):
-                if rad2deg*x >= (360./num_bands)*i and rad2deg*x <= (360./num_bands)*(i+1):
-                    return dI[i]
-        
-        relint_interp = interp1d([deg2rad*x for x in angle], dI, kind='cubic')
-        def integrand1(x):
-            return np.cos(x)*relint_interp(x)/np.pi 
-        def integrand2(x):
-            return np.sin(x)*relint_interp(x)/np.pi
-        '''def integrand1(x):
-            return np.cos(x)*relint_avg(x)/np.pi 
-        def integrand2(x):
-            return np.sin(x)*relint_avg(x)/np.pi'''
-        eq1 = quad(integrand1,deg2rad*anglemin,deg2rad*anglemax)[0]
-        eq2 = quad(integrand2,deg2rad*anglemin,deg2rad*anglemax)[0]
-        a0 = np.arctan(eq2/eq1)
-        A1 = eq1/np.cos(a0)
-        if A1 < 0.:
-            a0 -= np.pi
-            A1 = eq1/np.cos(a0)
-            dipole_avg.append(A1)
-            phase_avg.append(a0)
-        else:
-            dipole_avg.append(A1)
-            phase_avg.append(a0)
-        
-        if j==0:
-            xnew = np.arange(anglemin, anglemax, 1)
-            #plt.plot(angle,dI,marker='.',markersize=5,linestyle='None')
-            plt.plot(xnew,[relint_interp(i*deg2rad) for i in xnew],marker='None',lw=1,label='IC energy bin {}'.format(j+1))
-            plt.plot(xnew,[relint_avg(i*deg2rad) for i in xnew],marker='None',lw=1)
-            plt.hlines(0,0.0,360.0,linestyle='-.')
-            plt.legend()
-            ax = fig.axes[0]
-            ax.axis('on')
-            tPars = {'fontsize':16}
-            ax.set_xlim(0.0,360.)
-            ax.set_ylim(-0.0015,0.0010)
-            ax.set_xlabel(r'Right Ascension', **tPars)
-            ax.set_ylabel(r'Relative Intensity',**tPars)
-            ax = plt.gca()
-            ax.invert_xaxis()
-
-    
-    if args.output:
-        if args.plotname:
-            outFile  = args.outDir + args.plotname
-        else:
-            if args.lmax == 1:
-                name = 'relint_dipolefit'
-            elif args.lmax == 2:
-                name = 'relint_quadrupolefit'
-            elif args.lmax == 3:
-                name = 'relint_octupolefit'
-            else:
-                name = 'relint_data'
-            outFile  = args.outDir + name
-        plt.savefig(outFile+'.'+args.ext, dpi=300, bbox_inches='tight')
-    
+    # Produce dipole expansion coeeficient plot
     fig = plt.figure(1)
-    plt.errorbar(energy_bin_median,[1.*i for i in dipole_avg],xerr=[energy_err_lower, energy_err_upper], fmt='o')
-    #plt.errorbar(energy_bin_median,dipoles,xerr=[energy_err_upper, energy_err_lower], fmt='o')
-    ax = fig.axes[0]
-    ax.axis('on')
-    tPars = {'fontsize':16}
-    ax.set_ylim(0.0,0.0016)
-    ax.set_xlabel(r'$\log_{10}(E/\mathrm{GeV})', **tPars)
-    ax.set_ylabel(r'Dipole Amplitude',**tPars)
-    if args.output:
-        if args.plotname:
-            outFile  = args.outDir + args.plotname
-        else:
-            if args.lmax == 1:
-                name = 'dipole_dipolefit'
-            elif args.lmax == 2:
-                name = 'dipole_quadrupolefit'
-            elif args.lmax == 3:
-                name = 'dipole_octupolefit'
-            else:
-                name = 'dipole_data'
-            outFile  = args.outDir + name
-        plt.savefig(outFile+'.'+args.ext, dpi=300, bbox_inches='tight')
-    
-    fig = plt.figure(2)
-    plt.errorbar(energy_bin_median,[rad2deg*i for i in phase_avg],xerr=[energy_err_lower, energy_err_upper], fmt='o')
-    ax = fig.axes[0]
-    ax.axis('on')
-    tPars = {'fontsize':16}
-    #ax.set_ylim(-210,200)
-    ax.set_xlabel(r'$\log_{10}(E/\mathrm{GeV})', **tPars)
-    ax.set_ylabel(r'Phase Amplitude',**tPars)
+    labels = ['1','2','3']
+    for i in range(len(maps)):
+        # Read in (multiple) input files
+        data, bg, local = np.sum([hp.read_map(f, range(3), verbose=False)\
+                for f in maps[i]], axis=0)
+        a11 = []
+        a1n1 = []
+        for j in [1,2,3]:
+            p = multifit(j, data, bg, alpha, **opts)
+            a11.append(p['Y(1,1)'])
+            a1n1.append(p['Y(1,-1)'])
+        
+        plt.plot(a1n1,a11,marker='.',markersize=10,linestyle=':', label='IC energy bin {}'.format(i+1))
+        plt.hlines(0.0,-0.005,0.005,linestyle='-.',color='grey')
+        plt.vlines(0.0,-0.005,0.005,linestyle='-.',color='grey')
+        ax = fig.axes[0]
+        ax.axis('on')
+        tPars = {'fontsize':16}
+        #ax.set_xlim(-0.01,0.01)
+        #ax.set_ylim(-0.01,0.01)
+        ax.set_xlim(-0.005,0.005)
+        ax.set_ylim(-0.005,0.005)
+        ax.set_xlabel(r'$a_{1-1}$', **tPars)
+        ax.set_ylabel(r'$a_{11}$', **tPars)
+        plt.legend()
+        for label, x, y in zip(labels, a1n1, a11):
+            plt.annotate(
+                label, 
+                xy = (x, y), xytext = (-20, 20),
+                textcoords = 'offset points', ha = 'right', va = 'bottom',
+                bbox = dict(boxstyle = 'round,pad=0.5', fc = 'white', alpha = 0.5),
+                arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3,rad=0'))
+        
     if args.output:
         if args.plotname:
             outFile  = args.outDir + args.plotname
@@ -253,7 +149,7 @@ if __name__ == "__main__":
                 name = 'phase_data'
             outFile  = args.outDir + name
         plt.savefig(outFile+'.'+args.ext, dpi=300, bbox_inches='tight')
-
+    
     if not args.noshow:
         plt.show()
 
