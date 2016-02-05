@@ -1,5 +1,5 @@
 <p align="center">
-	<img src='https://dl.dropboxusercontent.com/u/73749948/IceCubeGen2-verticalBW.png'>
+	<img src='https://dl.dropboxusercontent.com/u/73749948/IceCubeGen2-verticalBW.png' width="50%">
 </p>
 
 ## timescramble
