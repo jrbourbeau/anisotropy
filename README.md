@@ -1,7 +1,3 @@
-<p align="center">
-	<img src='https://dl.dropboxusercontent.com/u/73749948/IceCubeGen2-verticalBW.png' width="50%">
-</p>
-
 ## timescramble
 
 **TimeScramble.cpp** - Computes the data, background, and local coordinates HEALPix maps of the cosmic ray arrival direction.
@@ -18,4 +14,8 @@
 
 ## ShowerLLH
 
+
+<p align="center">
+	<img src='https://dl.dropboxusercontent.com/u/73749948/IceCubeGen2-verticalBW.png' width="30%">
+</p>
 
