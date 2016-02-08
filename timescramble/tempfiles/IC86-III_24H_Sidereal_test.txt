@@ -1,1 +1,0 @@
-/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-05-02.root /data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-05-03.root /data/ana/CosmicRay/Anisotropy/IceCube/IC86-2013/simple-dst/ic86_simpleDST_2013-05-04.root

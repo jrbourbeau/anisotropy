@@ -1,8 +1,0 @@
-Universe  = vanilla
-Executable = npx4-execs/npx4-1998853.sh
-Log = npx4-logs/npx4-1998853.log
-Output = npx4-out/npx4-1998853.out
-Error = npx4-error/npx4-1998853.error
-Notification = Complete
-notify_user = james.bourbeau@icecube.wisc.edu
-Queue
