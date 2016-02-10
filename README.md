@@ -1,5 +1,3 @@
-This respository contains code used to study the cosmic ray anisotropy using the IceCube detector. 
-
 
 For more information see the project [wiki](https://github.com/jrbourbeau/anisotropy/wiki).
 

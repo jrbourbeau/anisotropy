@@ -126,6 +126,7 @@ def multifit(l, data, bg, alpha, **kwargs):
                 'decmax':-25, 'decmin':-90}
     opts = {k:kwargs[k] for k in kwargs if k in defaults}
     opts.update({k:defaults[k] for k in defaults if k not in opts})
+    #print('opts = {}'.format(opts))
 
     npix = len(data)
     #print('npix = {}'.format(npix))
@@ -240,6 +241,8 @@ def outputFit(p, fitparams, scale):
     print 'Fit values (x %d):' % scale
     for par in fitparams:
         print ' %s = %.3f +/- %.3f' % (par, scale*p[par], scale*p['d'+par])
+    for par in fitparams:
+        print ' %.3f %.3f' % (scale*p[par], scale*p['d'+par])
 
 
 # Takes in data, bg & dipole-quadrupole maps and creates false data map
@@ -427,9 +430,9 @@ def getMap(*inFiles, **kwargs):
         with np.errstate(invalid='ignore', divide='ignore'):
             map = (data/bg) * sqrt(1/data + alpha/bg)
     elif opts['mapName'] == 'fit':
-        map = multifit(3, data, bg, alpha, **opts)
+        #map = multifit(3, data, bg, alpha, **opts)
         #map = multifit(2, data, bg, alpha, **opts)
-        #map = multifit(1, data, bg, alpha, **opts)
+        map = multifit(1, data, bg, alpha, **opts)
     else:
         raise SystemExit('Unrecognized mapName: %s' % opts['mapName'])
 

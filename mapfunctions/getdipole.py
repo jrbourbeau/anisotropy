@@ -8,6 +8,7 @@ import os, glob, ROOT, time
 import matplotlib.pyplot as plt
 from matplotlib import rc
 from mapFunctions import getFitParams, outputFit, multifit
+from dipolePlot import getDipole 
 import argparse
 from energyCuts import getEnergyMaps
 
@@ -254,6 +255,14 @@ if __name__ == "__main__":
             outFile  = args.outDir + name
         plt.savefig(outFile+'.'+args.ext, dpi=300, bbox_inches='tight')
 
+    dipole_vec = getDipole()
+    
+    
+    
+    
+    
+    
+    
     if not args.noshow:
         plt.show()
 
