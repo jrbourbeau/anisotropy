@@ -1,0 +1,10 @@
+/data/sim/IceTop/2010/filtered/level2a/CORSIKA-ice-top/7241/01000-01999/Level2a_IC79_corsika_icetop.007241.001036.i3.bz2
+/data/sim/IceTop/2010/filtered/level2a/CORSIKA-ice-top/7241/01000-01999/Level2a_IC79_corsika_icetop.007241.001190.i3.bz2
+/data/sim/IceTop/2010/filtered/level2a/CORSIKA-ice-top/7241/01000-01999/Level2a_IC79_corsika_icetop.007241.001220.i3.bz2
+/data/sim/IceTop/2010/filtered/level2a/CORSIKA-ice-top/7241/01000-01999/Level2a_IC79_corsika_icetop.007241.001894.i3.bz2
+/data/sim/IceTop/2010/filtered/level2a/CORSIKA-ice-top/7241/01000-01999/Level2a_IC79_corsika_icetop.007241.001968.i3.bz2
+/data/sim/IceTop/2010/filtered/level2a/CORSIKA-ice-top/7241/01000-01999/Level2a_IC79_corsika_icetop.007241.001969.i3.bz2
+/data/sim/IceTop/2010/filtered/level2a/CORSIKA-ice-top/7241/02000-02999/Level2a_IC79_corsika_icetop.007241.002256.i3.bz2
+/data/sim/IceTop/2010/filtered/level2a/CORSIKA-ice-top/7241/02000-02999/Level2a_IC79_corsika_icetop.007241.002275.i3.bz2
+/data/sim/IceTop/2010/filtered/level2a/CORSIKA-ice-top/7241/02000-02999/Level2a_IC79_corsika_icetop.007241.002447.i3.bz2
+/data/sim/IceTop/2010/filtered/level2a/CORSIKA-ice-top/7241/02000-02999/Level2a_IC79_corsika_icetop.007241.002630.i3.bz2

@@ -126,7 +126,7 @@ def multifit(l, data, bg, alpha, **kwargs):
                 'decmax':-25, 'decmin':-90}
     opts = {k:kwargs[k] for k in kwargs if k in defaults}
     opts.update({k:defaults[k] for k in defaults if k not in opts})
-    #print('opts = {}'.format(opts))
+    print('opts = {}'.format(opts))
 
     npix = len(data)
     #print('npix = {}'.format(npix))
@@ -397,9 +397,12 @@ def getMap(*inFiles, **kwargs):
         for key in sorted(opts.keys()):
             print ' --%s: %s' % (key, opts[key])
 
-    # Read in (multiple) input files
-    data, bg, local = np.sum([hp.read_map(f, range(3), verbose=False)
-            for f in inFiles], axis=0)
+    if opts['mapName'] == 'single':
+        single = hp.read_map(inFiles, verbose=False)
+    else:
+        # Read in (multiple) input files
+        data, bg, local = np.sum([hp.read_map(f, range(3), verbose=False)
+                for f in inFiles], axis=0)
 
     # Option for multipole subtraction
     if opts['fix_multi']:
@@ -430,9 +433,11 @@ def getMap(*inFiles, **kwargs):
         with np.errstate(invalid='ignore', divide='ignore'):
             map = (data/bg) * sqrt(1/data + alpha/bg)
     elif opts['mapName'] == 'fit':
-        #map = multifit(3, data, bg, alpha, **opts)
+        map = multifit(3, data, bg, alpha, **opts)
         #map = multifit(2, data, bg, alpha, **opts)
-        map = multifit(1, data, bg, alpha, **opts)
+        #map = multifit(1, data, bg, alpha, **opts)
+    elif opts['mapName'] == 'single':
+        map = single
     else:
         raise SystemExit('Unrecognized mapName: %s' % opts['mapName'])
 
