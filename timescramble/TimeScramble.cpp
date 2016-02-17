@@ -347,7 +347,7 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 		//cutDST->Add((datapath+file_post).c_str());
 		cout << "Open TChain: " << yyyymmdd_post.c_str() << endl;
 	}
-	
+
 	SimpleDST dst(cutDST, config);
 
 	//cout << "Number of chained files: " << cutDST->GetNtrees() << endl;
@@ -392,13 +392,9 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 	double percent_completed_indicator = 0;
 	int progress_bar_width = 70;
 	
-	ofstream alifile;
-	alifile.open ("ali_times.txt");
 	for (Long64_t jentry = 0; jentry < nEntries; ++jentry) {
 		
 		cutDST->GetEntry(jentry);
-
-		alifile << "time = " << dst.ModJulDay << endl;
 
 		// Print progress bar to the console
 		if (double(jentry)/nEntries >= percent_completed_indicator) {
@@ -425,9 +421,6 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 
 		// Basic time check
 		if (dst.ModJulDay < mjd1) continue;	
-			// ISSUE:
-			// This should skip all events from the previous file
-			// If so, why did we load the previous file to begin with?
 		
 		//
 		// Additional checks on data
@@ -557,8 +550,7 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 			}
 		}
 	} // End of jentry loop
-	alifile.close();
-  
+
 	for (unsigned int m=0; m<nMaps; ++m) {
 
 		// Scale background map

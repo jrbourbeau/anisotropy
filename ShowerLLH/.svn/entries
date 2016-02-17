@@ -1,83 +1,0 @@
-10
-
-dir
-116419
-http://code.icecube.wisc.edu/svn/sandbox/fmcnally/ShowerLLH_scripts
-http://code.icecube.wisc.edu/svn
-
-
-
-2014-02-04T18:02:55.238717Z
-116419
-frank.mcnally
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-16731396-06f5-0310-8873-f7f720988828
-
-analysis
-dir
-
-useful
-dir
-
-segments
-dir
-
-makeTables
-dir
-
-npx4
-dir
-
-run_sim
-dir
-
-README
-file
-116420
-
-
-
-2014-02-04T18:15:09.000000Z
-1bd72361c2b9ec167ee4e29d9b83e2b4
-2014-02-04T18:16:08.129810Z
-116420
-frank.mcnally
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-244
-
-run_data
-dir
-

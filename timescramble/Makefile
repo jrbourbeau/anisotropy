@@ -40,4 +40,4 @@ timeScramble: TimeScramble.o SimpleDST.o
 	$(CXX) $(CXXFLAGS) -c $^
 
 clean:
-	rm -f *.o a.out TimeScramble 
+	rm -f *.o a.out timeScramble 

@@ -398,7 +398,7 @@ def getMap(*inFiles, **kwargs):
             print ' --%s: %s' % (key, opts[key])
 
     if opts['mapName'] == 'single':
-        single = hp.read_map(inFiles, verbose=False)
+        single = hp.read_map(inFiles[0], verbose=False)
     else:
         # Read in (multiple) input files
         data, bg, local = np.sum([hp.read_map(f, range(3), verbose=False)

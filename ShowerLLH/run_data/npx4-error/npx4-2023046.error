@@ -1,7 +1,0 @@
-Error in <TSystem::ExpandFileName>: input: $HOME/.root.mimes, output: $HOME/.root.mimes
-WARN (I3TableTranscriber): Input file contains no events, skipping file... (I3TableTranscriber.cxx:48 in I3TableTranscriber::I3TableTranscriber(I3TableServicePtr, I3TableServicePtr))
-FATAL (I3HDFTableService): Could not open HDF file '/data/user/zgriffith/ShowerLLH/IT81-II_data/files/burn_sample/DataLLH_201304_00122140_00000000_00122140_00000007.hdf5' (I3HDFTableService.cxx:54 in void I3HDFTableService::init(I3::dataio::shared_filehandle, int, char))
-Traceback (most recent call last):
-  File "/data/user/fmcnally/offline/V04-08-00/build/hdfwriter/resources/scripts/merge.py", line 66, in <module>
-    inservice = ctor(*args)
-RuntimeError: Could not open HDF file '/data/user/zgriffith/ShowerLLH/IT81-II_data/files/burn_sample/DataLLH_201304_00122140_00000000_00122140_00000007.hdf5' (in void I3HDFTableService::init(I3::dataio::shared_filehandle, int, char))

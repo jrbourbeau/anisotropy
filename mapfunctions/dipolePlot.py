@@ -25,6 +25,7 @@ def getDipole(p):
     dpx = p['dY(1,1)']
 
     # Calculate dipole strength
+    #p0  = np.sqrt(3.*(px**2 + py**2 + pz**2)/(4.*np.pi))
     p0  = np.sqrt(px**2 + py**2 + pz**2)
     dp0 = np.sqrt(((px*dpx)**2 + (py*dpy)**2 + (px*dpz)**2) / p0**2)
 

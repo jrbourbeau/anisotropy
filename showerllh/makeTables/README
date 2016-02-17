@@ -1,0 +1,24 @@
+## Follow these steps if you want or need to make your own likelihood tables ##
+
+Most of these scripts are made using argparse. Type "./[script] -h" for
+help messages and available options.
+
+1. Run MakeBins.py
+  - creates the bins for EZSDC (energy, zenith, snow depth, distance, & charge)
+  - modify bins if desired
+
+2. Run MakeGrid.py
+  - creates the points for iterative grid search
+
+3. Run maker.py
+  - mass submits MakeHist.py to the cluster
+  - MakeHist.py
+    - creates count tables using AddToHist
+    - stored as .npy files
+
+4. Run merger.py
+  - merges .npy files produced by MakeHist.py
+
+5. Run TableConverter.py
+  - converts count tables created by MakeHist into a single,
+    normalized file of LLHs

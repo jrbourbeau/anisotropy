@@ -116,10 +116,10 @@ if __name__ == "__main__":
             data, bg, local = np.sum([hp.read_map(f, range(3), verbose=False)\
                     for f in maps[i]], axis=0)
             p = multifit(l, data, bg, alpha, **opts)
-            print('p = {}'.format(np.sqrt(p['Y(1,0)']**2+p['Y(1,1)']**2+p['Y(1,-1)']**2)))
+            #print('p = {}'.format(np.sqrt(p['Y(1,0)']**2+p['Y(1,1)']**2+p['Y(1,-1)']**2)))
             dipole = getDipole(p)
-            print('dipole = {}'.format(dipole))
-            print('dipole[0] = {}'.format(dipole[0]))
+            #print('dipole = {}'.format(dipole))
+            #print('dipole[0] = {}'.format(dipole[0]))
             amplitude.append(dipole[0])
             amplitude_err.append(dipole[1])
             phase.append(dipole[2])
@@ -133,7 +133,8 @@ if __name__ == "__main__":
         ax.axis('on')
         tPars = {'fontsize':16}
         ax.set_xlim(3.5,7.5)
-        ax.set_ylim(0.0,0.0016)
+        #ax.set_ylim(0.0,0.0016)
+        ax.set_ylim(0.0,0.004)
         ax.set_ylabel(r'$\Delta N/\langle N \rangle$', **tPars)
         ax.set_xlabel(r'log$_{10}$(E/GeV)', **tPars)
         #plt.legend()

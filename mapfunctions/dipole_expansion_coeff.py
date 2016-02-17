@@ -103,52 +103,53 @@ if __name__ == "__main__":
     # Produce dipole expansion coeeficient plot
     #fig = plt.figure(1)
     labels = [r'$l=1$',r'$l=2$',r'$l=3$']
-    #for i in range(1):
-    for i in range(len(maps)):
-        # Read in (multiple) input files
-        data, bg, local = np.sum([hp.read_map(f, range(3), verbose=False)\
-                for f in maps[i]], axis=0)
-        a11 = []
-        a1n1 = []
-        a11_err = []
-        a1n1_err = []
-        for j in [1,2,3]:
-            p = multifit(j, data, bg, alpha, **opts)
-            #print('p = {}'.format(p))
-            a11.append(p['Y(1,1)'])
-            a1n1.append(p['Y(1,-1)'])
-            a11_err.append(p['dY(1,1)'])
-            a1n1_err.append(p['dY(1,-1)'])
-        
-        fig = plt.figure(i)
-        plt.errorbar(a1n1,a11,xerr=[a1n1_err,a1n1_err],yerr=[a11_err,a11_err],marker='.',markersize=10,linestyle=':', label='IC energy bin {}'.format(i+1))
-        #plt.plot(a1n1,a11,marker='.',markersize=10,linestyle=':', label='IC energy bin {}'.format(i+1))
-        plt.plot([0.0],[0.0],marker='.',markersize=10,linestyle='None', color='black')
-        #plt.hlines(0.0,-1.,1.,linestyle='-.',color='grey')
-        #plt.vlines(0.0,-1.,1.,linestyle='-.',color='grey')
-        ax = fig.axes[0]
-        ax.axis('on')
-        tPars = {'fontsize':16}
-        #ax.set_xlim(-0.01,0.01)
-        #ax.set_ylim(-0.01,0.01)
-        if max(map(abs,a11)) <= 0.005 and max(map(abs,a1n1)) <= 0.005:
-            ax.set_xlim(-0.005,0.005)
-            ax.set_ylim(-0.005,0.005)
-        else:
-            ax.set_xlim(-0.01,0.01)
-            ax.set_ylim(-0.01,0.01)
-        ax.set_xlabel(r'$a_{1-1}$', **tPars)
-        ax.set_ylabel(r'$a_{11}$', **tPars)
-        plt.legend()
-        ax.grid(True)
-        for label, x, y in zip(labels, a1n1, a11):
-            plt.annotate(
-                label, 
-                xy = (x, y), xytext = (-20, 20),
-                textcoords = 'offset points', ha = 'right', va = 'bottom',
-                bbox = dict(boxstyle = 'round,pad=0.5', fc = 'white', alpha = 0.5),
-                arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3,rad=0'))
-        plt.savefig(args.outDir+'dipole_coeeff_ICbin{}'.format(i+1)+'.'+args.ext, dpi=300, bbox_inches='tight')
+    for i in range(1):
+    #for i in range(len(maps)):
+        for k in range(10):
+            # Read in (multiple) input files
+            data, bg, local = np.sum([hp.read_map(f, range(3), verbose=False)\
+                    for f in maps[i]], axis=0)
+            a11 = []
+            a1n1 = []
+            a11_err = []
+            a1n1_err = []
+            for j in [1,2,3]:
+                p = multifit(j, data, bg, alpha, **opts)
+                #print('p = {}'.format(p))
+                a11.append(p['Y(1,1)'])
+                a1n1.append(p['Y(1,-1)'])
+                a11_err.append(p['dY(1,1)'])
+                a1n1_err.append(p['dY(1,-1)'])
+            
+            fig = plt.figure(i)
+            plt.errorbar(a1n1,a11,xerr=[a1n1_err,a1n1_err],yerr=[a11_err,a11_err],marker='.',markersize=10,linestyle=':', label='IC energy bin {}'.format(i+1))
+            #plt.plot(a1n1,a11,marker='.',markersize=10,linestyle=':', label='IC energy bin {}'.format(i+1))
+            plt.plot([0.0],[0.0],marker='.',markersize=10,linestyle='None', color='black')
+            #plt.hlines(0.0,-1.,1.,linestyle='-.',color='grey')
+            #plt.vlines(0.0,-1.,1.,linestyle='-.',color='grey')
+            ax = fig.axes[0]
+            ax.axis('on')
+            tPars = {'fontsize':16}
+            #ax.set_xlim(-0.01,0.01)
+            #ax.set_ylim(-0.01,0.01)
+            if max(map(abs,a11)) <= 0.005 and max(map(abs,a1n1)) <= 0.005:
+                ax.set_xlim(-0.005,0.005)
+                ax.set_ylim(-0.005,0.005)
+            else:
+                ax.set_xlim(-0.01,0.01)
+                ax.set_ylim(-0.01,0.01)
+            ax.set_xlabel(r'$a_{1-1}$', **tPars)
+            ax.set_ylabel(r'$a_{11}$', **tPars)
+            plt.legend()
+            ax.grid(True)
+            for label, x, y in zip(labels, a1n1, a11):
+                plt.annotate(
+                    label, 
+                    xy = (x, y), xytext = (-20, 20),
+                    textcoords = 'offset points', ha = 'right', va = 'bottom',
+                    bbox = dict(boxstyle = 'round,pad=0.5', fc = 'white', alpha = 0.5),
+                    arrowprops = dict(arrowstyle = '->', connectionstyle = 'arc3,rad=0'))
+            plt.savefig(args.outDir+'dipole_coeeff_ICbin{}'.format(i+1)+'.'+args.ext, dpi=300, bbox_inches='tight')
         
     if args.output:
         if args.plotname:

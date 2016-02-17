@@ -199,9 +199,7 @@ if __name__ == "__main__":
         args.mask = False
 
     opts = vars(args).copy()
-    print('opts = {}'.format(opts))
     # map = getMap(*args, **opts)
-    print('filepath = {}'.format(args.filepath))
     map = getMap(*[args.filepath], **opts)
 
     # Multiply by scale
@@ -291,6 +289,7 @@ if __name__ == "__main__":
     labelDict.update({'data':'Data','bg':'Background'})
     labelDict.update({'relint_err':'Relative Intensity Error'})
     labelDict.update({'fit':'Multipole Fit (Relative Intensity)'})
+    labelDict.update({'single':'Single Map'})
     label = labelDict[args.mapName]
     if args.scale:
         label += ' [x 10$^{-%d}$]' % args.scale
