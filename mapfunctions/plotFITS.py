@@ -229,14 +229,24 @@ if __name__ == "__main__":
     unmasked = np.array([i for i in map if (i!=hp.UNSEEN and i!=np.inf)])
     min = float(args.min) if args.min else unmasked.min()
     max = float(args.max) if args.max else unmasked.max()
+    # Make min-max symmetric for relative intensity maps
+    if args.mapName in ['relint','relint_err','signal','fit']:
+        if (min < 0.) and (max >= 0.) and (abs(min) <= abs(max)):
+            min = -max
+        if (min < 0.) and (max >= 0.) and (abs(min) >= abs(max)):
+            max = -min
     if not args.min:
         args.min = '%.2f' % min
     if not args.max:
         args.max = '%.2f' % max
 
     # Setup colormap with option for threshold
-    colormap = plt.get_cmap('jet')
-    #colormap = cmap_discretize(plt.get_cmap('jet'),[-1.0,-0.5,0.0,0.5,1.0])
+    #colormap = plt.get_cmap('jet')
+    if args.mapName in ['relint','relint_err','signal','fit']:
+        colormap = cmap_discretize(plt.get_cmap('seismic'),np.linspace(min,max,20))
+        #colormap = cmap_discretize(plt.get_cmap('coolwarm'),np.linspace(min,max,20))
+    else:    
+        colormap = cmap_discretize(cmaps.viridis,np.linspace(min,max,20))
     #colormap = plt.get_cmap('seismic')
     #colormap = plt.get_cmap('coolwarm')
     #colormap = cmaps.viridis
@@ -271,6 +281,7 @@ if __name__ == "__main__":
         xlabels = ['%i' % (rot-xtick) for xtick in ax.get_xticks()]
         ax.set_xticklabels(xlabels)
     elif proj == 'Orthographic':
+
         pltParams['rot'] = [0,-90,rot]
         hp.orthview(map, half_sky=True, **pltParams)
     else:

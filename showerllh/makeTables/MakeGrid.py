@@ -6,7 +6,8 @@ import argparse
 
 import myGlobals as my
 import simFunctions_IT as simFunctions
-from showerllh.analysis.llhTools import getVertex
+#from showerllh.analysis.llhTools import getVertex
+from showerllh.analysis.llhtools import getVertex
 
 # Read a gcd file and return the tank positions
 def getTanks(outFile):
@@ -19,7 +20,7 @@ def getTanks(outFile):
         gcd = simFunctions.getGCD(config)
 
         # Extract Geometry and DetectorStatus
-        print 'Loading %s...' % gcd
+        print 'Loading {}...'.format(gcd)
         i3file = dataio.I3File(gcd)
         finished, geo_check, status_check = False, False, False
         while not finished:
@@ -83,9 +84,14 @@ def makeGrids(**kwargs):
 
     # Find the tank positions
     tankpos = np.load(kwargs['tankFile'])
+    #print('tankpos = {}'.format(tankpos))
     tankpos = tankpos.item()
+    #print('tankpos = {}'.format(tankpos))
     tank_xy = tankpos[kwargs['config']]
+    #print('tank_xy = {}'.format(tank_xy))
     tank_x, tank_y = np.transpose(tank_xy)
+    #print('tank_x = {}'.format(tank_x))
+    #print('tank_y = {}'.format(tank_y))
 
     # pick out the positions of the tanks on the bottom edge and fit
     bot = (tank_y < -390)

@@ -3,6 +3,7 @@
 import healpy as hp
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import rc
 from scipy.optimize import curve_fit
 from tabulate import tabulate
 import glob, argparse, os
@@ -11,47 +12,13 @@ import myGlobals as my
 from useful import getMids
 from mapFunctions import getMap
 from proj1d import returnRI_new as returnRI
+from projFunctions import *
 from energyCuts import getEbins, getEnergyMaps
 from anisotropy.icesim.analysis import readDist as readDist_IC
 from anisotropy.topsim.analysis import readDist as readDist_IT
 
-
-def sinefit(x, *p):
-    f0 = 2*np.pi / 360
-    #return sum([p[3*i] * np.sin(f0*(i+1) * (x + p[3*i+1])) + p[3*i+2]
-    #        for i in range(len(p)/3)])
-    return sum([p[2*i] * np.sin(f0*(i+1) * (x + p[2*i+1])) 
-            for i in range(len(p)/2)])
-
-def cosinefit(x, *p):
-    f0 = 2*np.pi / 360
-    return sum([p[2*i+1] * np.cos(f0*(i+1) * (x - p[2*i+2]))
-            for i in range(len(p)/2)]) + p[0]
-    #return sum([p[2*i] * np.cos(f0*i * (x - p[2*i+1]))
-    #        for i in range(len(p)/2)])
-
-def multipoleFit(x, y, l, sigmay, fittype='cos'):
-    # Guess at best fit parameters
-    amplitude = (3./np.sqrt(2)) * np.std(y)
-    phase     = 0
-    p0 = [amplitude, phase]*l
-    # Reduce amplitude as we go to higher l values
-    for i in range(0,len(p0)/2):
-        p0[2*i] *= 2.**(-i)
-    if fittype == 'cos':
-        p0 = [0] + p0
-        #p0 = [0, 0] + p0
-        fitfunc = cosinefit
-    else:
-        fitfunc = sinefit
-    # Do best fit
-    popt, pcov = curve_fit(fitfunc, x, y, p0, sigma=sigmay)
-    fitVals = fitfunc(x, *popt)
-    ndof  = len(popt)
-    chi2 = (1. / (len(y)-ndof)) * sum((y - fitVals)**2 / sigmay**2)
-    perr = np.sqrt(np.diag(pcov))
-    #perr = perr_scaled / chi2
-    return popt, perr, chi2
+rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+rc('text', usetex=True)
 
 
 if __name__ == "__main__":
@@ -61,9 +28,6 @@ if __name__ == "__main__":
 
     p = argparse.ArgumentParser(
             description='')
-    #p.add_argument('-n', '--nbins', dest='nbins', type=int,
-    #        default=72,
-    #        help='Number of bins to split RA into')
     p.add_argument('-f', '--files', dest='files',
             default='energy',
             choices=['energy','config','comp','solar'],
@@ -105,7 +69,7 @@ if __name__ == "__main__":
         #x = getMids(ebins, infvalue=100)
         smooth = 20
         # Custom treatment of IT map
-        files += [['%s/IT_24H_sid_STA8.fits' % my.ani_maps]]
+        files += [['{}/IT_24H_sid_STA8.fits'.format(my.ani_maps)]]
         #x = np.append(x, np.log10(2*10**6))
         median, sigL, sigR = readDist_IT('IT', 8, 100)
         x  += [median]
@@ -128,42 +92,31 @@ if __name__ == "__main__":
         ax = fig.add_subplot(111)
 
     nfiles = len(files)
-    #nbins = 360 / smooth
     lmax = args.nbins/2 - 1
     if lmax > 15:
         lmax = 15
 
     opts = {'mask':True, 'ramin':0., 'ramax':360., 'nbins':args.nbins}
-    #opts = {'decmax':-35.,'decmin':-88.,'ramin':0.,'ramax':360.,'nbins':nbins}
     amp, phase, amp_err, phase_err = np.zeros((4, nfiles))
     chi2array = np.zeros((nfiles,lmax-1))
 
-    def getRelInt(file):
+    # Calculate best harmonic function fit value based on chi2
+    # Fill chi-squared array
+    for i, file in enumerate(files):
         if type(file) != list:
             file = [file]
-        #bgmap = getMap(*file, mapName='bg', **opts)
-        #datamap = getMap(*file, mapName='data', **opts)
-        #bgmap[bgmap==hp.UNSEEN] = 0
-        #datamap[datamap==hp.UNSEEN] = 0
-        #ra, ri, sigmax, sigmay = returnRI(bgmap, datamap, **opts)
-        relint = getMap(*file, mapName='relint', **opts)
-        relerr = getMap(*file, mapName='relerr', **opts)
-        ra, ri, sigmax, sigmay = returnRI(relint, relerr, **opts)
-        return ra, ri, sigmax, sigmay
-
-    # Calculate best multipole-fit value based on chi2
-    for i, file in enumerate(files):
-        ra, ri, sigmax, sigmay = getRelInt(file)
+        ra, ri, ra_err, ri_err = getRIRAProj(file,**opts)
         for l in range(1, lmax):
-            popt, perr, chi2 = multipoleFit(ra, ri, l, sigmay)
+            popt, perr, chi2 = getHarmonicFitParams(ra, ri, l, ri_err)
             chi2array[i][l-1] = chi2
             if i == args.solo:
-                #fig, ax = plt.subplots()
-                ax.errorbar(ra, ri, sigmay, fmt='.')
-                fullra = range(360)
-                #fit = [sinefit(j, *popt) for j in fullra]
-                fit = [cosinefit(j, *popt) for j in fullra]
-                ax.plot(fullra, fit, label=l)
+                if l==1:
+                    ax.errorbar(ra, ri, ri_err, fmt='.',label=r'Data')
+                fullra = range(0,360,5)
+                fit = [cosFit(j, *popt) for j in fullra]
+                ax.plot(fullra, fit, label=r'$l_{} = {}$ Fit'.format('{max}',l))
+                ax.set_xlim(0.,360.)
+                ax.invert_xaxis()
 
     if args.chi2:
         chi2table = chi2array.tolist()
@@ -175,15 +128,9 @@ if __name__ == "__main__":
         chi2array[chi2array < .7] = 100
         args.l = chi2array.sum(axis=0).argmin() + 1
 
+    opts['lmax'] = args.l
     for i, file in enumerate(files):
-        ra, ri, sigmax, sigmay = getRelInt(file)
-        popt, perr, chi2 = multipoleFit(ra, ri, args.l, sigmay)
-        #a = np.reshape(popt, (-1,2))
-        a = np.reshape(popt[1:], (-1,2))
-        amp[i], phase[i] = a[0]
-        #e = np.reshape(perr, (-1,2))
-        e = np.reshape(perr[1:], (-1,2))
-        amp_err[i], phase_err[i] = e[0]
+        amp[i],amp_err[i],phase[i],phase_err[i] = getProjDipole(file,**opts)
 
     # Deal with negative amplitudes/phases
     c0 = amp < 0
@@ -191,11 +138,6 @@ if __name__ == "__main__":
     phase[c0] += 180
     phase[phase > 360] -= 360
     phase[phase < 0] += 360
-
-    #print amp
-    #print amp_err
-    #print phase
-    #print phase_err
 
     if args.files == 'energy':
         idx0 = len(ebins) - 1
@@ -212,9 +154,9 @@ if __name__ == "__main__":
     if args.solo == None:
         fig = plt.figure(figsize=(17,6))
         ax = fig.add_subplot(121)
-        #ax.set_title('Amplitude', fontsize=16)
         ax.set_xlabel(r'$\mathrm{log}_{10}(E/\mathrm{GeV})$', fontsize=14)
-        ax.set_ylabel(r'$\Delta N/\langle N \rangle$', fontsize=14)
+        #ax.set_ylabel(r'$\Delta N/\langle N \rangle$', fontsize=14)
+        ax.set_ylabel(r'$A_1$', fontsize=14)
         if args.files == 'config':
             ax.set_xlim(-1, x[-1]+1)
             ax.set_xticks(x)
@@ -223,7 +165,6 @@ if __name__ == "__main__":
         if args.files == 'comp':
             ax.set_xlabel('Energy per Nucleon')
             ax.set_xlim(0, 1.1)
-
         if args.files == 'energy':
             ax.errorbar(x_ic, amp_ic, xerr=xerr_ic, yerr=amp_err_ic, 
                     c='b', **pltParams)
@@ -246,10 +187,10 @@ if __name__ == "__main__":
                 phase[np.logical_not(pcut)] += (360 - args.offset)
 
         ax = fig.add_subplot(122)
-        #ax.set_title('Phase', fontsize=16)
         ax.set_xlabel(r'$\mathrm{log}_{10}(E/\mathrm{GeV})$', fontsize=14)
         #ax.set_ylabel(r'Dipole phase $(\phi/\mathrm{deg})$', fontsize=14)
-        ax.set_ylabel(r'Right Ascension $[^{\circ}]$', fontsize=14)
+        #ax.set_ylabel(r'Right Ascension $[^{\circ}]$', fontsize=14)
+        ax.set_ylabel(r'$\alpha_1 \ [^{\circ}]$', fontsize=14)
         if args.files == 'config':
             ax.set_xlim(-1, x[-1]+1)
             ax.set_xticks(x)

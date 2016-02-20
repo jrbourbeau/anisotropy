@@ -375,6 +375,10 @@ def getMap(*inFiles, **kwargs):
     opts.update({k:defaults[k] for k in defaults if k not in opts})
     alpha = 1/20.
 
+    if not os.path.basename(inFiles[0])[:2] in ['IT','IC']:
+        print('Based on filename, detector might not be IC\
+                or IT. Please double check RA and Dec cuts.')
+
     # Require mapName input
     if not opts['mapName']:
         raise SystemExit('mapName parameter not given!')

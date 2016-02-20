@@ -73,7 +73,7 @@ def returnRI_new(relint_map, relerr_map, **opts):
     ramin = opts['ramin'] * deg2rad
     ramax = opts['ramax'] * deg2rad
     rabins = np.linspace(ramin, ramax, opts['nbins']+1)
-    print('rabins = {}'.format(rabins))
+    #print('rabins = {}'.format(rabins))
 
     # Calculate phi for each pixel
     npix  = len(relint_map)

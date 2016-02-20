@@ -59,6 +59,7 @@ if __name__ == "__main__":
         for i, param in enumerate(order):
             binVals[bintype][i] = [param, bins[param]]
 
+    #print('binVals = {}'.format(binVals))
     # Save to outFile
     np.save(args.outFile, binVals)
 
