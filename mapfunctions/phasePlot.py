@@ -54,7 +54,8 @@ if __name__ == "__main__":
 
     if args.files == 'config':
         files = glob.glob('%s/IC?*_24H_sid.fits' % my.ani_maps)
-        configs = np.array([os.path.basename(f).split('_')[0] for f in files])
+        configs = np.array([os.path.basename(f).split('_')[0] \
+                for f in files])
         csort = configs.argsort()
         configs, files = configs[csort], np.asarray(files)[csort]
         x = range(len(configs))
@@ -140,6 +141,7 @@ if __name__ == "__main__":
     phase[phase < 0] += 360
 
     if args.files == 'energy':
+        print(':w is working!')
         idx0 = len(ebins) - 1
         x_ic, x_it = x[:idx0], x[idx0:]
         xerr_ic = [xL[:idx0], xR[:idx0]]

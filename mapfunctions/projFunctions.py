@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 
 #==============================================================================
-# File Name : projFunctions.py
-# Description : Store functions commonly used in RA projection and  
-#               harmonic fitting for calcuating dipole amplitude/phase
+# File Name     : projFunctions.py
+# Description   : Store functions commonly used in RA projection and  
+#                 harmonic fitting for calcuating dipole amplitude/phase
 # Creation Date : 02-19-2016
-# Last Modified : Fri 19 Feb 2016 06:50:56 PM CST
-# Created By : James Bourbeau
+# Last Modified : Mon 22 Feb 2016 12:17:01 PM CST
+# Created By    : James Bourbeau
 #==============================================================================
-
-from mapFunctions import getMap
 
 import numpy as np
 import healpy as hp
@@ -17,6 +15,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
+from mapFunctions import getMap
 
 class re_order_errorbarHandler(mpl.legend_handler.HandlerErrorbar):
     def create_artists(self, *args, **kwargs):
@@ -31,21 +30,17 @@ def getRIRAProj(file, **opts):
     # Get relint and relerr maps
     relint = getMap(*file, mapName='relint', **opts)
     relerr = getMap(*file, mapName='relerr', **opts)
-
     # Setup right-ascension bins
     deg2rad = np.pi / 180
     ramin = opts['ramin'] * deg2rad
     ramax = opts['ramax'] * deg2rad
     rabins, rabinwidth = np.linspace(ramin, ramax, opts['nbins']+1,retstep=True)
-
     # Calculate phi for each pixel
     npix  = len(relint)
     nside = hp.npix2nside(npix)
     theta, phi = hp.pix2ang(nside, range(npix))
-    
     # Bin in right ascension
     phiBins = np.digitize(phi, rabins) - 1
-   
     # UNSEEN cut
     pass_UNSEEN_cut = (relint != hp.UNSEEN)
 
@@ -89,9 +84,8 @@ def getHarmonicFitParams(x, y, l, sigmay):
     deg2rad = 2*np.pi / 360
     fitfunc = lambda x, *p: sum([p[2*i+1] * np.cos(deg2rad*(i+1)*(x-p[2*i+2])) \
             for i in range(len(p)/2)]) + p[0]
-    
     # Do best fit
-    popt, pcov = curve_fit(fitfunc, x, y, parm_init, sigma=sigmay)
+    popt, pcov = curve_fit(fitfunc, x, y, p0=parm_init, sigma=sigmay)
     fitVals = fitfunc(x, *popt)
     ndof  = len(popt)
     chi2 = (1. / (len(y)-ndof)) * sum((y - fitVals)**2 / sigmay**2)
@@ -104,7 +98,6 @@ def getProjDipole(file, **opts):
 
     # Project the relint map in RA
     ra, ri, ra_err, ri_err = getRIRAProj(file,**opts)
-
     # Fit projected RI to cos harmonic functions
     popt, perr, chi2 = getHarmonicFitParams(ra, ri, opts['lmax'], ri_err)
     
