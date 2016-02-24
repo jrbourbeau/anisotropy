@@ -2,7 +2,7 @@
 
 #==============================================================================
 # File Name     : projFunctions.py
-# Description   : Store functions commonly used in RA projection and  
+# Description   : Store functions commonly used in RA projection and
 #                 harmonic fitting for calcuating dipole amplitude/phase
 # Creation Date : 02-19-2016
 # Last Modified : Mon 22 Feb 2016 12:17:01 PM CST
@@ -15,21 +15,18 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
-from mapFunctions import getMap
+#from mapFunctions import getMap
 
 class re_order_errorbarHandler(mpl.legend_handler.HandlerErrorbar):
     def create_artists(self, *args, **kwargs):
-        a = mpl.legend_handler.HandlerErrorbar.create_artists(self, 
+        a = mpl.legend_handler.HandlerErrorbar.create_artists(self,
                 *args, **kwargs)
         a = a[-1:] + a[:-1]
         return a
 
 
-def getRIRAProj(file, **opts):
-    
-    # Get relint and relerr maps
-    relint = getMap(*file, mapName='relint', **opts)
-    relerr = getMap(*file, mapName='relerr', **opts)
+def getRIRAProj(relint, relerr=None, **opts):
+
     # Setup right-ascension bins
     deg2rad = np.pi / 180
     ramin = opts['ramin'] * deg2rad
@@ -43,19 +40,26 @@ def getRIRAProj(file, **opts):
     phiBins = np.digitize(phi, rabins) - 1
     # UNSEEN cut
     pass_UNSEEN_cut = (relint != hp.UNSEEN)
+    pass_INF_cut = np.array([True]*len(pass_UNSEEN_cut))
+    if relerr is not None:
+        pass_INF_cut = (relerr != np.inf)
 
     ri, ri_err = np.zeros((2,opts['nbins']))
     for i in range(opts['nbins']):
         pass_phiBin_cut = (phiBins == i)
-        pass_all_cuts = pass_UNSEEN_cut * pass_phiBin_cut
+        pass_all_cuts = pass_UNSEEN_cut * pass_phiBin_cut * pass_INF_cut
         ri[i] = np.mean(relint[pass_all_cuts])
-        ri_err[i] = np.sqrt(np.sum(relerr[pass_all_cuts]**2))/pass_all_cuts.sum()
+        if relerr is not None:
+            ri_err[i] = np.sqrt(np.sum(relerr[pass_all_cuts]**2))/pass_all_cuts.sum()
         #ri_err = np.sqrt(data * (bg + 1./20 * data)/bg**3)
     dx = rabinwidth/2.
     ra = np.linspace(ramin+dx, ramax-dx, opts['nbins']) / deg2rad
     ra_err = dx * np.ones(opts['nbins']) / deg2rad
 
-    return (ra, ri, ra_err, ri_err)
+    if relerr is None:
+        return (ra, ri, ra_err)
+    else:
+        return (ra, ri, ra_err, ri_err)
 
 
 def lineFit(x, y, sigmay):
@@ -70,8 +74,8 @@ def cosFit(x, *p):
     return sum([p[2*i+1] * np.cos(deg2rad*(i+1)*(x-p[2*i+2])) \
             for i in range(len(p)/2)]) + p[0]
 
-def getHarmonicFitParams(x, y, l, sigmay):
-    
+def getHarmonicFitParams(x, y, l, sigmay=None):
+
     # Guess at best fit parameters
     amplitude = (3./np.sqrt(2)) * np.std(y)
     phase     = 0
@@ -80,7 +84,7 @@ def getHarmonicFitParams(x, y, l, sigmay):
     for i in range(0,len(parm_init)/2):
         parm_init[2*i] *= 2.**(-i)
     parm_init = [0] + parm_init
-    
+
     deg2rad = 2*np.pi / 360
     fitfunc = lambda x, *p: sum([p[2*i+1] * np.cos(deg2rad*(i+1)*(x-p[2*i+2])) \
             for i in range(len(p)/2)]) + p[0]
@@ -88,19 +92,28 @@ def getHarmonicFitParams(x, y, l, sigmay):
     popt, pcov = curve_fit(fitfunc, x, y, p0=parm_init, sigma=sigmay)
     fitVals = fitfunc(x, *popt)
     ndof  = len(popt)
-    chi2 = (1. / (len(y)-ndof)) * sum((y - fitVals)**2 / sigmay**2)
+    if sigmay is not None:
+        chi2 = (1. / (len(y)-ndof)) * sum((y - fitVals)**2 / sigmay**2)
+    else:
+        chi2 = (1. / (len(y)-ndof)) * sum((y - fitVals)**2)
     perr = np.sqrt(np.diag(pcov))
-    
+
     return popt, perr, chi2
 
 
-def getProjDipole(file, **opts):
+def getProjDipole(relint, relerr=None, **opts):
 
     # Project the relint map in RA
-    ra, ri, ra_err, ri_err = getRIRAProj(file,**opts)
+    if relerr is None:
+        ra, ri, ra_err = getRIRAProj(relint, relerr, **opts)
+    else:
+        ra, ri, ra_err, ri_err = getRIRAProj(relint, relerr, **opts)
     # Fit projected RI to cos harmonic functions
-    popt, perr, chi2 = getHarmonicFitParams(ra, ri, opts['lmax'], ri_err)
-    
+    if relerr is None:
+        popt, perr, chi2 = getHarmonicFitParams(ra, ri, opts['lmax'])
+    else:
+        popt, perr, chi2 = getHarmonicFitParams(ra, ri, opts['lmax'], ri_err)
+
     # Extract dipole amp/phase and errors
     a = np.reshape(popt[1:], (-1,2))
     amp, phase = a[0]
@@ -130,4 +143,3 @@ def calcAvgBkg(ax, datamap, basename, **opts):
     ra, ri, sigmax, sigmay = returnRI(bgmap, datamap, **opts)
     ax.errorbar(ra, ri, xerr=0*sigmax, yerr=sigmay, marker='o', fmt='.',\
             capsize=4, label=basename+" (avg)", linewidth=2, markersize=8, mew=0)
-

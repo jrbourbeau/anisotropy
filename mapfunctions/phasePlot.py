@@ -106,7 +106,10 @@ if __name__ == "__main__":
     for i, file in enumerate(files):
         if type(file) != list:
             file = [file]
-        ra, ri, ra_err, ri_err = getRIRAProj(file,**opts)
+        # Get relint and relerr maps
+        relint = getMap(*file, mapName='relint', **opts)
+        relerr = getMap(*file, mapName='relerr', **opts)
+        ra, ri, ra_err, ri_err = getRIRAProj(relint, relerr,**opts)
         for l in range(1, lmax):
             popt, perr, chi2 = getHarmonicFitParams(ra, ri, l, ri_err)
             chi2array[i][l-1] = chi2
@@ -131,7 +134,10 @@ if __name__ == "__main__":
 
     opts['lmax'] = args.l
     for i, file in enumerate(files):
-        amp[i],amp_err[i],phase[i],phase_err[i] = getProjDipole(file,**opts)
+        # Get relint and relerr maps
+        relint = getMap(*file, mapName='relint', **opts)
+        relerr = getMap(*file, mapName='relerr', **opts)
+        amp[i],amp_err[i],phase[i],phase_err[i] = getProjDipole(relint, relerr, **opts)
 
     # Deal with negative amplitudes/phases
     c0 = amp < 0
@@ -141,7 +147,6 @@ if __name__ == "__main__":
     phase[phase < 0] += 360
 
     if args.files == 'energy':
-        print(':w is working!')
         idx0 = len(ebins) - 1
         x_ic, x_it = x[:idx0], x[idx0:]
         xerr_ic = [xL[:idx0], xR[:idx0]]

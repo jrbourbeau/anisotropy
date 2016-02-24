@@ -33,8 +33,8 @@ if __name__ == "__main__":
     args = p.parse_args()
 
     # Default parameters
-    binFile = '%s/ShowerLLH_bins.npy' % my.llh_resource
-    outDir = '%s/CountTables' % my.llh_resource
+    binFile = '{}/ShowerLLH_bins.npy'.format(my.llh_resource)
+    outDir = '{}/CountTables'.format(my.llh_resource)
     if args.test and args.n==100:
         args.n = 1
 
@@ -79,9 +79,3 @@ if __name__ == "__main__":
     print 'Submitting %i batches...' % njobs
     for ex in exList:
         py_submit(ex, test=args.test)
-
-
-
-
-
-

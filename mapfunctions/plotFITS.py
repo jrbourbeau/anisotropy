@@ -113,7 +113,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
             description='description: Plotting program for healpix maps.')
-    
+
     parser.add_argument('-f','--filepath', help='Path to healpix fit file to be analyzed')
     parser.add_argument('-m', '--min', dest='min', help='Plot minimum value')
     parser.add_argument('-M', '--max', dest='max', help='Plot maximum value')
@@ -125,7 +125,7 @@ if __name__ == "__main__":
             help='Minimum RA value')
     parser.add_argument('-R', '--ramax', dest='ramax', type=float,
             help='Maximum RA value')
-    parser.add_argument('--mask', dest='mask', default=False, 
+    parser.add_argument('--mask', dest='mask', default=False,
             action='store_true', help='Intelligent masking')
     parser.add_argument('-b', '--batchmode', action='store_true', dest='batch',
             default=False, help='Execute without interaction')
@@ -190,7 +190,8 @@ if __name__ == "__main__":
     # detector = os.path.basename(args[0])[:2]
     detector = os.path.basename(args.filepath)[:2]
     if args.mask:
-        args.decmax = -25.
+        if args.decmax == 90.:
+            args.decmax = -25.
         if detector == 'IT':
             args.decmax = -35.
             # if any([k in re.split('_|\.',args[0]) for k in ['p','h','o','f']]):
@@ -245,7 +246,7 @@ if __name__ == "__main__":
     if args.mapName in ['relint','relint_err','signal','fit']:
         colormap = cmap_discretize(plt.get_cmap('seismic'),np.linspace(min,max,20))
         #colormap = cmap_discretize(plt.get_cmap('coolwarm'),np.linspace(min,max,20))
-    else:    
+    else:
         colormap = cmap_discretize(cmaps.viridis,np.linspace(min,max,20))
     #colormap = plt.get_cmap('seismic')
     #colormap = plt.get_cmap('coolwarm')
@@ -329,8 +330,8 @@ if __name__ == "__main__":
             ax.annotate(lbl, xy=(-1.85,-0.24), **lParams)
         if args.rlabel:
             ax.annotate(args.rlabel, xy=(1.3,-0.24), **lParams)
-        fig.set_size_inches(w, h/2.8, forward=True)
-        #fig.set_size_inches(2.0*w, 4.0*h/2.8, forward=True)
+        #fig.set_size_inches(w, h/2.8, forward=True)
+        fig.set_size_inches(2.0*w, 4.0*h/2.8, forward=True)
     if args.prelim:
         ax = [axis for axis in fig.get_axes() if type(axis) is projaxis][0]
         IT = 'IceTop' if detector=='IT' else 'IceCube'
@@ -344,8 +345,3 @@ if __name__ == "__main__":
 
     if not args.batch:
         plt.show()
-
-
-
-
-

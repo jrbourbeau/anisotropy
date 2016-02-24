@@ -126,7 +126,7 @@ def multifit(l, data, bg, alpha, **kwargs):
                 'decmax':-25, 'decmin':-90}
     opts = {k:kwargs[k] for k in kwargs if k in defaults}
     opts.update({k:defaults[k] for k in defaults if k not in opts})
-    print('opts = {}'.format(opts))
+    #print('opts = {}'.format(opts))
 
     npix = len(data)
     #print('npix = {}'.format(npix))
@@ -176,6 +176,8 @@ def multifit(l, data, bg, alpha, **kwargs):
                 #print('norm_sphharm({},{}, vx, vy, vz) = {}'.format(lvals[i],mvals[i],norm_sphharm(lvals[i], mvals[i], vx, vy, vz)))
         #print('fit = {}'.format(fit))
         df = skymap - fit
+        print('par[1] = {}'.format(par[1]))
+        print('par[3] = {}'.format(par[3]))
         f[0] = (df**2 / skymapVar).sum()
 
     # Setup minimizer
@@ -241,8 +243,8 @@ def outputFit(p, fitparams, scale):
     print 'Fit values (x %d):' % scale
     for par in fitparams:
         print ' %s = %.3f +/- %.3f' % (par, scale*p[par], scale*p['d'+par])
-    for par in fitparams:
-        print ' %.3f %.3f' % (scale*p[par], scale*p['d'+par])
+    #for par in fitparams:
+    #    print ' %.3f %.3f' % (scale*p[par], scale*p['d'+par])
 
 
 # Takes in data, bg & dipole-quadrupole maps and creates false data map
@@ -375,6 +377,10 @@ def getMap(*inFiles, **kwargs):
     opts.update({k:defaults[k] for k in defaults if k not in opts})
     alpha = 1/20.
 
+    if not os.path.basename(inFiles[0])[:2] in ['IT','IC']:
+        print('Based on filename, detector might not be IC\
+                or IT. Please double check RA and Dec cuts.')
+
     # Require mapName input
     if not opts['mapName']:
         raise SystemExit('mapName parameter not given!')
@@ -398,7 +404,7 @@ def getMap(*inFiles, **kwargs):
             print ' --%s: %s' % (key, opts[key])
 
     if opts['mapName'] == 'single':
-        single = hp.read_map(inFiles, verbose=False)
+        single = hp.read_map(inFiles[0], verbose=False)
     else:
         # Read in (multiple) input files
         data, bg, local = np.sum([hp.read_map(f, range(3), verbose=False)
@@ -433,9 +439,9 @@ def getMap(*inFiles, **kwargs):
         with np.errstate(invalid='ignore', divide='ignore'):
             map = (data/bg) * sqrt(1/data + alpha/bg)
     elif opts['mapName'] == 'fit':
-        map = multifit(3, data, bg, alpha, **opts)
+        #map = multifit(3, data, bg, alpha, **opts)
         #map = multifit(2, data, bg, alpha, **opts)
-        #map = multifit(1, data, bg, alpha, **opts)
+        map = multifit(1, data, bg, alpha, **opts)
     elif opts['mapName'] == 'single':
         map = single
     else:
