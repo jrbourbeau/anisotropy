@@ -14,8 +14,10 @@ import healpy as hp
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
+from matplotlib import rc
 
-#from mapFunctions import getMap
+rc('font', **{'family': 'serif', 'serif': ['Computer Modern']})
+rc('text', usetex=True)
 
 class re_order_errorbarHandler(mpl.legend_handler.HandlerErrorbar):
     def create_artists(self, *args, **kwargs):
@@ -27,14 +29,19 @@ class re_order_errorbarHandler(mpl.legend_handler.HandlerErrorbar):
 
 def getRIRAProj(relint, relerr=None, **opts):
 
-    # Setup right-ascension bins
+    # Restrict range to desired zenith angles
     deg2rad = np.pi / 180
+    npix  = len(relint)
+    nside = hp.npix2nside(npix)
+    minZ = opts['decmin'] * deg2rad
+    maxZ = opts['decmax'] * deg2rad
+    vx, vy, vz = hp.pix2vec(nside, [i for i in range(npix)])
+    zcut = (vz >= minZ) * (vz <= maxZ)
+    # Setup right-ascension bins
     ramin = opts['ramin'] * deg2rad
     ramax = opts['ramax'] * deg2rad
     rabins, rabinwidth = np.linspace(ramin, ramax, opts['nbins']+1,retstep=True)
     # Calculate phi for each pixel
-    npix  = len(relint)
-    nside = hp.npix2nside(npix)
     theta, phi = hp.pix2ang(nside, range(npix))
     # Bin in right ascension
     phiBins = np.digitize(phi, rabins) - 1
@@ -47,7 +54,7 @@ def getRIRAProj(relint, relerr=None, **opts):
     ri, ri_err = np.zeros((2,opts['nbins']))
     for i in range(opts['nbins']):
         pass_phiBin_cut = (phiBins == i)
-        pass_all_cuts = pass_UNSEEN_cut * pass_phiBin_cut * pass_INF_cut
+        pass_all_cuts = pass_UNSEEN_cut * pass_phiBin_cut * pass_INF_cut*zcut
         ri[i] = np.mean(relint[pass_all_cuts])
         if relerr is not None:
             ri_err[i] = np.sqrt(np.sum(relerr[pass_all_cuts]**2))/pass_all_cuts.sum()
@@ -108,11 +115,29 @@ def getProjDipole(relint, relerr=None, **opts):
         ra, ri, ra_err = getRIRAProj(relint, relerr, **opts)
     else:
         ra, ri, ra_err, ri_err = getRIRAProj(relint, relerr, **opts)
+    # Plot relative intensity vs right ascension
+    if opts['plot']:
+        fig = plt.figure(2)
+        plt.errorbar(ra,ri,xerr=ra_err,marker='.',linestyle='None',label='Proj. Data')
+        ax = fig.axes[0]
+        ax.axis('on')
+        tPars = {'fontsize':16}
+        ax.set_xlim(0.0,360.)
+        ax.set_ylim(-0.0015,0.0010)
+        ax.set_xlabel(r'Right Ascension', **tPars)
+        ax.set_ylabel(r'Relative Intensity',**tPars)
+        ax = plt.gca()
+        ax.invert_xaxis()
     # Fit projected RI to cos harmonic functions
     if relerr is None:
         popt, perr, chi2 = getHarmonicFitParams(ra, ri, opts['lmax'])
     else:
         popt, perr, chi2 = getHarmonicFitParams(ra, ri, opts['lmax'], ri_err)
+
+    if opts['plot']:
+        plt.plot(ra,cosFit(ra,*popt[:3]),label='Dipole Fit')
+        plt.legend()
+        plt.savefig('/home/jbourbeau/public_html/figures/almTibet/proj_relint_lmax3_tibet.png', dpi=300, bbox_inches='tight')
 
     # Extract dipole amp/phase and errors
     a = np.reshape(popt[1:], (-1,2))

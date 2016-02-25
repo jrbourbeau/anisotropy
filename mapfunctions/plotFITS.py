@@ -190,8 +190,7 @@ if __name__ == "__main__":
     # detector = os.path.basename(args[0])[:2]
     detector = os.path.basename(args.filepath)[:2]
     if args.mask:
-        if args.decmax == 90.:
-            args.decmax = -25.
+        args.decmax = -25.
         if detector == 'IT':
             args.decmax = -35.
             # if any([k in re.split('_|\.',args[0]) for k in ['p','h','o','f']]):
@@ -244,7 +243,7 @@ if __name__ == "__main__":
     # Setup colormap with option for threshold
     #colormap = plt.get_cmap('jet')
     if args.mapName in ['relint','relint_err','signal','fit']:
-        colormap = cmap_discretize(plt.get_cmap('seismic'),np.linspace(min,max,20))
+        colormap = cmap_discretize(plt.get_cmap('seismic'),np.linspace(min,max,30))
         #colormap = cmap_discretize(plt.get_cmap('coolwarm'),np.linspace(min,max,20))
     else:
         colormap = cmap_discretize(cmaps.viridis,np.linspace(min,max,20))

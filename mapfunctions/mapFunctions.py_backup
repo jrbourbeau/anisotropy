@@ -6,6 +6,7 @@ import os, glob, ROOT, time
 from numpy import sqrt, pi
 from numpy.polynomial import Legendre
 import matplotlib.pyplot as plt
+from projFunctions import getProjDipole
 
 
 def maskMap(map, decmin, decmax):
@@ -120,16 +121,13 @@ def real_sphharm(l, m, vx, vy, vz):
 
 ## Creates dipole and quadrupole fit map
 def multifit(l, data, bg, alpha, **kwargs):
-    #print('l = {}'.format(l))
 
     defaults = {'params':False, 'out':False, 'verbose':False, \
                 'decmax':-25, 'decmin':-90}
     opts = {k:kwargs[k] for k in kwargs if k in defaults}
     opts.update({k:defaults[k] for k in defaults if k not in opts})
-    #print('opts = {}'.format(opts))
 
     npix = len(data)
-    #print('npix = {}'.format(npix))
     nside = hp.npix2nside(npix)
     degree = pi / 180.
     minZ = opts['decmin'] * degree
@@ -137,15 +135,10 @@ def multifit(l, data, bg, alpha, **kwargs):
 
     # Useful breakdown of l, m values to be used
     nsph = sum([2*l_i+1 for l_i in range(l+1)])
-    #print('nsph = {}'.format(nsph))
     lvals = [[l_i]*(2*l_i+1) for l_i in range(l+1)]
-    #print('lvals = {}'.format(lvals))
     mvals = [[m for m in range(-l_i, l_i+1)] for l_i in range(l+1)]
-    #print('mvals = {}'.format(mvals))
     lvals = [item for sublist in lvals for item in sublist]
-    #print('lvals = {}'.format(lvals))
     mvals = [item for sublist in mvals for item in sublist]
-    #print('mvals = {}'.format(mvals))
 
     # Calculate relative intensity and variance
     with np.errstate(invalid='ignore', divide='ignore'):
@@ -156,16 +149,12 @@ def multifit(l, data, bg, alpha, **kwargs):
 
     # Restrict range to desired zenith angles
     vx, vy, vz = hp.pix2vec(nside, [i for i in range(npix)])
-    #print('vx = {}'.format(vx))
-    #print('vy = {}'.format(vy))
-    #print('vz = {}'.format(vz))
     zcut = (vz >= minZ) * (vz <= maxZ)
-    #print('zcut = {}'.format(zcut))
     skymap[np.logical_not(zcut)] = 0
     skymapVar[np.logical_not(zcut)] = np.inf
     ndata = zcut.sum()
-    #print('ndata = {}'.format(ndata))
 
+    # Original chi-squared function
     # Chi-squared function to minimize for fit
     def chi2(npar, derivatives, f, par, internal_flag):
         fit = np.zeros(len(vx))
@@ -180,19 +169,47 @@ def multifit(l, data, bg, alpha, **kwargs):
         print('par[3] = {}'.format(par[3]))
         f[0] = (df**2 / skymapVar).sum()
 
+    # Chi-squared function to minimize with Tibet dipole
+    def chi2Tibet(npar, derivatives, f, par, internal_flag):
+        fit = np.zeros(len(vx))
+        for i in range(len(lvals)):
+            fit += par[i] * norm_sphharm(lvals[i], mvals[i], vx, vy, vz)
+        df = skymap - fit
+        opts['ramin'] = 0.
+        opts['ramax'] = 360.
+        opts['nbins'] = 24
+        opts['lmax'] = l
+        opts['decmin'] = -30.
+        opts['decmax'] = 90.
+        opts['plot'] = False
+
+        amp, amp_err, phase, phase_err = getProjDipole(fit, **opts)
+        #print('amp = {}'.format(amp*10**4))
+        #print('amp_err = {}'.format(amp_err*10**4))
+        #print('phase = {}'.format(phase))
+
+        #f[0] = (df**2 / skymapVar).sum()
+        #f[0] = (df**2 / skymapVar).sum()+(par[1]/(1e-12))**2
+        #f[0] = (df**2 / skymapVar).sum()+((amp-8.5e-4)/(amp_err))**2
+        #f[0] = (df**2 / skymapVar).sum()+((amp-8.5e-4)/(0.2e-4))**2
+        f[0] = (df**2 / skymapVar).sum()+((amp-8.5e-4)/(0.2e-4))**2 +((phase-21.9)/(1.6))**2
+
     # Setup minimizer
     minimizer = ROOT.TMinuit(nsph)
-    minimizer.SetFCN(chi2)
+    minimizer.SetFCN(chi2Tibet)
+    #minimizer.SetFCN(chi2)
     error_code = ROOT.Long(0)
-    minimizer.mnexcm("SET PRINTOUT", np.array([-1]), 1, error_code)
+    #minimizer.mnexcm("SET PRINTOUT", np.array([-1]), 1, error_code)
+    minimizer.mnexcm("SET PRINTOUT", np.array([3]), 1, error_code)
 
     fitparams = ['Y(%i,%i)' % (lvals[i], mvals[i]) for i in range(nsph)]
     for i, p in enumerate(fitparams):
-        minimizer.mnparm(i, p, 0., 1e-6, -1e6, 1e6, error_code)
+        #minimizer.mnparm(i, p, 0., 1e-6, -1e6, 1e6, error_code)
+        minimizer.mnparm(i, p, 1e-6, 1e-6, -1e6, 1e6, error_code)
 
     # Iterate MIGRAD up to 1000 times
     minimizer.mnexcm("SET STR", np.array([2]), 1, error_code)
-    minimizer.mnexcm("MIGRAD", np.array([1000]), 1, error_code)
+    minimizer.mnexcm("MIGRAD", np.array([5000]), 1, error_code)
 
     # Extract best fit parameters
     p = getFitParams(minimizer, fitparams, ndata)
@@ -208,6 +225,15 @@ def multifit(l, data, bg, alpha, **kwargs):
     for i in range(nsph):
         #fitmap += p[fitparams[i]] * real_sphharm(lvals[i],mvals[i],vx,vy,vz)
         fitmap += p[fitparams[i]] * norm_sphharm(lvals[i],mvals[i],vx,vy,vz)
+
+    # Plot relative intensity vs right ascension
+    # comment decmin/decmax in this section for Tibet
+    #opts['decmin'] = -90.
+    #opts['decmax'] = -25.
+    #opts['plot'] = True
+    amp, amp_err, phase, phase_err = getProjDipole(fitmap, **opts)
+    print('\nDipole = {}'.format(amp*10**4))
+    print('Phase = {} \n'.format(phase))
 
     if opts['out']:
         hp.write_map(out, fitmap)
@@ -439,9 +465,9 @@ def getMap(*inFiles, **kwargs):
         with np.errstate(invalid='ignore', divide='ignore'):
             map = (data/bg) * sqrt(1/data + alpha/bg)
     elif opts['mapName'] == 'fit':
-        #map = multifit(3, data, bg, alpha, **opts)
+        map = multifit(3, data, bg, alpha, **opts)
         #map = multifit(2, data, bg, alpha, **opts)
-        map = multifit(1, data, bg, alpha, **opts)
+        #map = multifit(1, data, bg, alpha, **opts)
     elif opts['mapName'] == 'single':
         map = single
     else:
@@ -452,6 +478,3 @@ def getMap(*inFiles, **kwargs):
     map = maskMap(map, opts['decmin'], opts['decmax'])
 
     return map
-
-
-
