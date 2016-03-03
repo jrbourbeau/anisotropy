@@ -29,14 +29,14 @@ class re_order_errorbarHandler(mpl.legend_handler.HandlerErrorbar):
 
 def getRIRAProj(relint, relerr=None, **opts):
 
-    # Restrict range to desired zenith angles
+    # Cut to desired dec range (equiv to healpy zenith range)
     deg2rad = np.pi / 180
     npix  = len(relint)
     nside = hp.npix2nside(npix)
-    minZ = opts['decmin'] * deg2rad
-    maxZ = opts['decmax'] * deg2rad
-    vx, vy, vz = hp.pix2vec(nside, [i for i in range(npix)])
-    zcut = (vz >= minZ) * (vz <= maxZ)
+    theta, phi = hp.pix2ang(nside, range(npix))
+    thetamax = (90 - opts['decmin']) * deg2rad
+    thetamin = (90 - opts['decmax']) * deg2rad
+    pass_dec_cut = (theta <= thetamax) * (theta >= thetamin)
     # Setup right-ascension bins
     ramin = opts['ramin'] * deg2rad
     ramax = opts['ramax'] * deg2rad
@@ -54,7 +54,7 @@ def getRIRAProj(relint, relerr=None, **opts):
     ri, ri_err = np.zeros((2,opts['nbins']))
     for i in range(opts['nbins']):
         pass_phiBin_cut = (phiBins == i)
-        pass_all_cuts = pass_UNSEEN_cut * pass_phiBin_cut * pass_INF_cut*zcut
+        pass_all_cuts = pass_UNSEEN_cut*pass_phiBin_cut*pass_INF_cut*pass_dec_cut
         ri[i] = np.mean(relint[pass_all_cuts])
         if relerr is not None:
             ri_err[i] = np.sqrt(np.sum(relerr[pass_all_cuts]**2))/pass_all_cuts.sum()
@@ -68,13 +68,6 @@ def getRIRAProj(relint, relerr=None, **opts):
     else:
         return (ra, ri, ra_err, ri_err)
 
-
-def lineFit(x, y, sigmay):
-    p = np.polyfit(x, y, 0, w=ri_err)
-    fit = np.poly1d(p)
-    fitVals = fit(np.asarray(y))
-    chi2 = (1. / (len(y)-1)) * sum((y - fitVals)**2 / sigmay**2)
-    return fitVals, p, chi2
 
 def cosFit(x, *p):
     deg2rad = 2*np.pi / 360
@@ -115,6 +108,18 @@ def getProjDipole(relint, relerr=None, **opts):
         ra, ri, ra_err = getRIRAProj(relint, relerr, **opts)
     else:
         ra, ri, ra_err, ri_err = getRIRAProj(relint, relerr, **opts)
+    # Fit projected RI to cos harmonic functions
+    if relerr is None:
+        popt, perr, chi2 = getHarmonicFitParams(ra, ri, opts['lmax'])
+    else:
+        popt, perr, chi2 = getHarmonicFitParams(ra, ri, opts['lmax'], ri_err)
+
+    # Extract dipole amp/phase and errors
+    a = np.reshape(popt[1:], (-1,2))
+    amp, phase = a[0]
+    e = np.reshape(perr[1:], (-1,2))
+    amp_err, phase_err = e[0]
+
     # Plot relative intensity vs right ascension
     if opts['plot']:
         fig = plt.figure(2)
@@ -123,27 +128,22 @@ def getProjDipole(relint, relerr=None, **opts):
         ax.axis('on')
         tPars = {'fontsize':16}
         ax.set_xlim(0.0,360.)
-        ax.set_ylim(-0.0015,0.0010)
+        ax.set_ylim(-0.0015,0.0015)
+        #ax.set_ylim(-0.0025,0.0025)
         ax.set_xlabel(r'Right Ascension', **tPars)
         ax.set_ylabel(r'Relative Intensity',**tPars)
         ax = plt.gca()
         ax.invert_xaxis()
-    # Fit projected RI to cos harmonic functions
-    if relerr is None:
-        popt, perr, chi2 = getHarmonicFitParams(ra, ri, opts['lmax'])
-    else:
-        popt, perr, chi2 = getHarmonicFitParams(ra, ri, opts['lmax'], ri_err)
-
-    if opts['plot']:
         plt.plot(ra,cosFit(ra,*popt[:3]),label='Dipole Fit')
         plt.legend()
-        plt.savefig('/home/jbourbeau/public_html/figures/almTibet/proj_relint_lmax3_tibet.png', dpi=300, bbox_inches='tight')
-
-    # Extract dipole amp/phase and errors
-    a = np.reshape(popt[1:], (-1,2))
-    amp, phase = a[0]
-    e = np.reshape(perr[1:], (-1,2))
-    amp_err, phase_err = e[0]
+        ax.annotate(r'$d_1$-$d_2$ $\chi^2$', xy=(100, -0.00085))
+        ax.annotate(r'Dipole = {:2.2e}'.format(amp), xy=(100, -0.0010))
+        ax.annotate(r'Phase = {:g}'.format(phase), xy=(100, -0.00115))
+        #ax.annotate(r'Standard $\chi^2$', xy=(150, -0.008))
+        #ax.annotate(r'Dipole = {:2.2e}'.format(amp), xy=(150, -0.010))
+        #ax.annotate(r'Phase = {:g}'.format(phase), xy=(150, -0.012))
+        plt.savefig('/home/jbourbeau/public_html/figures/almTibet/tibet_relint_lmax3_d1d2chi2_3.png',
+            dpi=300, bbox_inches='tight')
 
     return amp, amp_err, phase, phase_err
 

@@ -247,7 +247,7 @@ if __name__ == "__main__":
         #colormap = cmap_discretize(plt.get_cmap('coolwarm'),np.linspace(min,max,20))
     else:
         colormap = cmap_discretize(cmaps.viridis,np.linspace(min,max,20))
-    #colormap = plt.get_cmap('seismic')
+    #colormap = plt.get_cmap('jet')
     #colormap = plt.get_cmap('coolwarm')
     #colormap = cmaps.viridis
     if args.threshold:
