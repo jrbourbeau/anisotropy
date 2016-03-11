@@ -196,7 +196,7 @@ if __name__ == "__main__":
             # if any([k in re.split('_|\.',args[0]) for k in ['p','h','o','f']]):
             if any([k in re.split('_|\.',args.filepath) for k in ['p','h','o','f']]):
                 args.decmax = 37.9 - 90.
-        args.mask = False
+        #args.mask = False
 
     opts = vars(args).copy()
     # map = getMap(*args, **opts)
@@ -242,7 +242,8 @@ if __name__ == "__main__":
 
     # Setup colormap with option for threshold
     #colormap = plt.get_cmap('jet')
-    if args.mapName in ['relint','relint_err','signal','fit']:
+    if args.mapName in ['relint','relint_err','signal','fit','single']:
+        #colormap = plt.get_cmap('seismic')
         colormap = cmap_discretize(plt.get_cmap('seismic'),np.linspace(min,max,30))
         #colormap = cmap_discretize(plt.get_cmap('coolwarm'),np.linspace(min,max,20))
     else:
@@ -330,7 +331,7 @@ if __name__ == "__main__":
         if args.rlabel:
             ax.annotate(args.rlabel, xy=(1.3,-0.24), **lParams)
         #fig.set_size_inches(w, h/2.8, forward=True)
-        fig.set_size_inches(2.0*w, 4.0*h/2.8, forward=True)
+        fig.set_size_inches(w, h/2.8, forward=True)
     if args.prelim:
         ax = [axis for axis in fig.get_axes() if type(axis) is projaxis][0]
         IT = 'IceTop' if detector=='IT' else 'IceCube'

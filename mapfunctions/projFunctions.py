@@ -5,7 +5,7 @@
 # Description   : Store functions commonly used in RA projection and
 #                 harmonic fitting for calcuating dipole amplitude/phase
 # Creation Date : 02-19-2016
-# Last Modified : Mon 22 Feb 2016 12:17:01 PM CST
+# Last Modified : Thu 03 Mar 2016 04:16:49 PM CST
 # Created By    : James Bourbeau
 #==============================================================================
 
@@ -92,6 +92,8 @@ def getHarmonicFitParams(x, y, l, sigmay=None):
     popt, pcov = curve_fit(fitfunc, x, y, p0=parm_init, sigma=sigmay)
     fitVals = fitfunc(x, *popt)
     ndof  = len(popt)
+    print('len(popt) = {}'.format(ndof))
+    print('len(y) = {}'.format(len(y)))
     if sigmay is not None:
         chi2 = (1. / (len(y)-ndof)) * sum((y - fitVals)**2 / sigmay**2)
     else:
@@ -119,31 +121,6 @@ def getProjDipole(relint, relerr=None, **opts):
     amp, phase = a[0]
     e = np.reshape(perr[1:], (-1,2))
     amp_err, phase_err = e[0]
-
-    # Plot relative intensity vs right ascension
-    if opts['plot']:
-        fig = plt.figure(2)
-        plt.errorbar(ra,ri,xerr=ra_err,marker='.',linestyle='None',label='Proj. Data')
-        ax = fig.axes[0]
-        ax.axis('on')
-        tPars = {'fontsize':16}
-        ax.set_xlim(0.0,360.)
-        ax.set_ylim(-0.0015,0.0015)
-        #ax.set_ylim(-0.0025,0.0025)
-        ax.set_xlabel(r'Right Ascension', **tPars)
-        ax.set_ylabel(r'Relative Intensity',**tPars)
-        ax = plt.gca()
-        ax.invert_xaxis()
-        plt.plot(ra,cosFit(ra,*popt[:3]),label='Dipole Fit')
-        plt.legend()
-        ax.annotate(r'$d_1$-$d_2$ $\chi^2$', xy=(100, -0.00085))
-        ax.annotate(r'Dipole = {:2.2e}'.format(amp), xy=(100, -0.0010))
-        ax.annotate(r'Phase = {:g}'.format(phase), xy=(100, -0.00115))
-        #ax.annotate(r'Standard $\chi^2$', xy=(150, -0.008))
-        #ax.annotate(r'Dipole = {:2.2e}'.format(amp), xy=(150, -0.010))
-        #ax.annotate(r'Phase = {:g}'.format(phase), xy=(150, -0.012))
-        plt.savefig('/home/jbourbeau/public_html/figures/almTibet/tibet_relint_lmax3_d1d2chi2_3.png',
-            dpi=300, bbox_inches='tight')
 
     return amp, amp_err, phase, phase_err
 

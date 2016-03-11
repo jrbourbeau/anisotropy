@@ -6,7 +6,7 @@ import os, glob, ROOT, time
 from numpy import sqrt, pi
 from numpy.polynomial import Legendre
 import matplotlib.pyplot as plt
-from projFunctions import getProjDipole, getRIRAProj
+from projFunctions import getProjDipole, getRIRAProj, getHarmonicFitParams
 
 
 def maskMap(map, decmin, decmax):
@@ -67,13 +67,15 @@ def norm_sphharm(l, m, vx, vy, vz):
     if l==2 and m==2:
         return (vx**2 - vy**2) * 1/4. * sqrt(15/pi)
     if l==3 and m==-3:
-        return (3*vx**2 - vy*vx) * vy * 1/4. * sqrt(35/(2*pi))
+        #return (3*vx**2 - vy*vx) * vy * 1/4. * sqrt(35/(2*pi))
+        return (3*vx**2 - vy**2) * vy * 1/4. * sqrt(35/(2*pi))
     if l==3 and m==-2:
         return vx*vy*vz * 1/2. * sqrt(105/pi)
     if l==3 and m==-1:
         return (5*vz**2 - 1) * vy * 1/4. * sqrt(21/(2*pi))
     if l==3 and m==0:
-        return (vz**2 - 1) * vz * 1/4. * sqrt(7/pi)
+        #return (vz**2 - 1) * vz * 1/4. * sqrt(7/pi)
+        return (2*vz**2 - 3*vx**2 - 3*vy**2) * vz * 1/4. * sqrt(7/pi)
     if l==3 and m==1:
         return (5*vz**2 - 1) * vx * 1/4. * sqrt(21/(2*pi))
     if l==3 and m==2:
@@ -141,7 +143,7 @@ def real_sphharm(l, m, vx, vy, vz):
 def multifit(l, data, bg, alpha, **kwargs):
 
     defaults = {'params':False, 'out':False, 'verbose':False, \
-                'decmax':-25, 'decmin':-90}
+                'decmax':-25, 'decmin':-90, 'chi2': None}
     opts = {k:kwargs[k] for k in kwargs if k in defaults}
     opts.update({k:defaults[k] for k in defaults if k not in opts})
 
@@ -162,7 +164,7 @@ def multifit(l, data, bg, alpha, **kwargs):
     # Cut to desired dec range (equiv to healpy zenith range)
     deg2rad = np.pi / 180
     npix  = len(data)
-    print('npix = {}'.format(npix))
+    #print('npix = {}'.format(npix))
     nside = hp.npix2nside(npix)
     theta, phi = hp.pix2ang(nside, range(npix))
     thetamax = (90-opts['decmin']) * deg2rad
@@ -171,17 +173,17 @@ def multifit(l, data, bg, alpha, **kwargs):
     skymap[np.logical_not(pass_dec_cut)] = 0
     skymapVar[np.logical_not(pass_dec_cut)] = np.inf
     ndata = pass_dec_cut.sum()
-    print('pass_dec_cut = {}'.format(pass_dec_cut.sum()))
+    #print('pass_dec_cut = {}'.format(pass_dec_cut.sum()))
 
     # Restrict range to desired zenith angles
-    minZ = opts['decmin'] * deg2rad
+    '''minZ = opts['decmin'] * deg2rad
     maxZ = opts['decmax'] * deg2rad
     vx, vy, vz = hp.pix2vec(nside, [i for i in range(npix)])
     zcut = (vz >= minZ) * (vz <= maxZ)
-    #skymap[np.logical_not(zcut)] = 0
-    #skymapVar[np.logical_not(zcut)] = np.inf
-    #ndata = zcut.sum()
-    print('zcut = {}'.format(zcut.sum()))
+    skymap[np.logical_not(zcut)] = 0
+    skymapVar[np.logical_not(zcut)] = np.inf
+    ndata = zcut.sum()'''
+    #print('zcut = {}'.format(zcut.sum()))
 
     # Original chi-squared function
     # Chi-squared function to minimize for fit
@@ -206,45 +208,57 @@ def multifit(l, data, bg, alpha, **kwargs):
     tibetdata = np.loadtxt('Tibet_data.dat')
     tibetRA = tibetdata[:,0]
     tibetRAerr = [10.]*18
-    tibetRI = tibetdata[:,1]
+    tibetRI = tibetdata[:,1]-1.
     tibetRIerr = np.array([2.8e-5]*18)
 
     opts.update({'ramin':0., 'ramax':360., 'nbins':18, 'lmax':3,
         'decmin':-30., 'decmax':90., 'plot':False})
 
+    vx, vy, vz = hp.pix2vec(nside, [i for i in range(npix)])
+    normedSH = np.load('/home/jbourbeau/anisotropy/dev/normedSH.npy')
+    normedSH = normedSH.item()
+    fitparams = ['Y(%i,%i)' % (lvals[i], mvals[i]) for i in range(nsph)]
+    fiterrparams = ['dY(%i,%i)' % (lvals[i], mvals[i]) for i in range(nsph)]
     def chi2Tibet(npar, derivatives, f, par, internal_flag):
         fit = np.zeros(len(vx))
         for i in range(len(lvals)):
-            fit += par[i] * norm_sphharm(lvals[i], mvals[i], vx, vy, vz)
+            #fit += par[i] * norm_sphharm(lvals[i], mvals[i], vx, vy, vz)
+            fit += par[i] * normedSH[fitparams[i]]
         df = skymap - fit
 
-        amp, amp_err, phase, phase_err = getProjDipole(fit, **opts)
-        d1 = amp*np.cos(phase*deg2rad)
-        d2 = amp*np.sin(phase*deg2rad)
-        RA, RI, RAerr = getRIRAProj(fit,**opts)
-        #f[0] = (df**2 / skymapVar).sum()
+        if opts['chi2']=='standard' or opts['chi2']==None:
+            f[0] = (df**2 / skymapVar).sum()
         #f[0] = (df**2 / skymapVar).sum()+((amp-8.5e-4)/(0.2e-4))**2 +((phase-21.9)/(1.6))**2
-        f[0] = (df**2 / skymapVar).sum()+(d1-d1_tibet)**2/(d1_var) +(d2-d2_tibet)**2/(d2_var)
-        #f[0] = (df**2 / skymapVar).sum()+(((RI-tibetRI)/tibetRIerr)**2).sum()
+        if opts['chi2']=='d1d2':
+            amp, amp_err, phase, phase_err = getProjDipole(fit, **opts)
+            d1 = amp*np.cos(phase*deg2rad)
+            d2 = amp*np.sin(phase*deg2rad)
+            f[0] = (df**2 / skymapVar).sum()+(d1-d1_tibet)**2/(d1_var) +(d2-d2_tibet)**2/(d2_var)
+        if opts['chi2']=='RI':
+            RA, RI, RAerr = getRIRAProj(fit,**opts)
+            f[0] = (df**2 / skymapVar).sum()+(((RI-tibetRI)/tibetRIerr)**2).sum()
 
     # Setup minimizer
     minimizer = ROOT.TMinuit(nsph)
     minimizer.SetFCN(chi2Tibet)
     error_code = ROOT.Long(0)
-    #minimizer.mnexcm("SET PRINTOUT", np.array([-1]), 1, error_code)
-    minimizer.mnexcm("SET PRINTOUT", np.array([3]), 1, error_code)
+    minimizer.mnexcm("SET PRINTOUT", np.array([-1]), 1, error_code)
+    # minimizer.mnexcm("SET PRINTOUT", np.array([3]), 1, error_code)
 
-    fitparams = ['Y(%i,%i)' % (lvals[i], mvals[i]) for i in range(nsph)]
+    #fitparams = ['Y(%i,%i)' % (lvals[i], mvals[i]) for i in range(nsph)]
+    #fiterrparams = ['dY(%i,%i)' % (lvals[i], mvals[i]) for i in range(nsph)]
     for i, p in enumerate(fitparams):
         #minimizer.mnparm(i, p, 0., 1e-6, -1e6, 1e6, error_code)
-        minimizer.mnparm(i, p, 1e-6, 1e-6, -1e6, 1e6, error_code)
+        minimizer.mnparm(i, p, 1e-9, 1e-6, -1e6, 1e6, error_code)
 
     # Iterate MIGRAD up to 1000 times
     minimizer.mnexcm("SET STR", np.array([2]), 1, error_code)
-    minimizer.mnexcm("MIGRAD", np.array([1000]), 1, error_code)
+    minimizer.mnexcm("MIGRAD", np.array([2000]), 1, error_code)
 
     # Extract best fit parameters
     p = getFitParams(minimizer, fitparams, ndata)
+    #print('p = {}'.format(p))
+    #np.save('/home/jbourbeau/anisotropy/dev/typedSHparms_lmax_2.npy', p)
 
     if opts['verbose']:
         outputFit(p, fitparams, 1e4)
@@ -252,18 +266,24 @@ def multifit(l, data, bg, alpha, **kwargs):
     if opts['params']:
         return p
 
+    if opts['chi2']!=None:
+        return fitparams, fiterrparams, p
+
     # Create map with dipole/quadrupole fit
     fitmap = np.zeros(len(vx))
+    fiterrmap = np.zeros(len(vx))
     for i in range(nsph):
-        #fitmap += p[fitparams[i]] * real_sphharm(lvals[i],mvals[i],vx,vy,vz)
-        fitmap += p[fitparams[i]] * norm_sphharm(lvals[i],mvals[i],vx,vy,vz)
+        #fitmap += p[fitparams[i]] * norm_sphharm(lvals[i],mvals[i],vx,vy,vz)
+        #fiterrmap += p[fiterrparams[i]] * norm_sphharm(lvals[i],mvals[i],vx,vy,vz)
+        fitmap += p[fitparams[i]] * normedSH[fitparams[i]]
+        fiterrmap += p[fiterrparams[i]] * normedSH[fitparams[i]]
 
     # Plot relative intensity vs right ascension
     # comment decmin/decmax in this section for Tibet
     #opts['decmin'] = -90.
     #opts['decmax'] = -25.
     #opts['plot'] = True
-    #amp, amp_err, phase, phase_err = getProjDipole(fitmap, **opts)
+    #amp, amp_err, phase, phase_err = getProjDipole(fitmap,fiterrmap, **opts)
     #print('\nDipole = {}'.format(amp*10**4))
     #print('Phase = {} \n'.format(phase))
     '''d1 = amp*np.cos(phase*deg2rad)
@@ -299,13 +319,20 @@ def getFitParams(minimizer, fitparams, ndata):
         p[par], p['d'+par] = ROOT.Double(0), ROOT.Double(0)
         minimizer.GetParameter(i, p[par], p['d'+par])
 
+    # For some reason there was an issue using numpy.save() when the
+    # values in p were ROOT.Double(0). A quick fix is to convert
+    # all the values in p to floats
+    for key in p:
+        p[key] = float(p[key])
+
     return p
 
 
 ## Ouput parameters from dipole/quadrupole fit
 def outputFit(p, fitparams, scale):
 
-    print '\nchi2/ndf = %.1f / %d = %.2e' % (p['chi2'], p['ndof'], p['prob'])
+    print '\nchi2/ndf = %.1f / %d = %.4f' % (p['chi2'], p['ndof'],p['chi2']/float(p['ndof']))
+    print '\nprob = %.2e' % (p['prob'])
     print 'Fit values (x %d):' % scale
     for par in fitparams:
         print ' %s = %.3f +/- %.3f' % (par, scale*p[par], scale*p['d'+par])
@@ -506,8 +533,8 @@ def getMap(*inFiles, **kwargs):
             map = (data/bg) * sqrt(1/data + alpha/bg)
     elif opts['mapName'] == 'fit':
         #map = multifit(4, data, bg, alpha, **opts)
-        map = multifit(3, data, bg, alpha, **opts)
-        #map = multifit(2, data, bg, alpha, **opts)
+        #map = multifit(3, data, bg, alpha, **opts)
+        map = multifit(2, data, bg, alpha, **opts)
         #map = multifit(1, data, bg, alpha, **opts)
     elif opts['mapName'] == 'single':
         map = single
@@ -517,6 +544,7 @@ def getMap(*inFiles, **kwargs):
     # Eliminate nan's and mask
     map[np.isnan(map)] = 0
     # For desplaying full skyp fit maps comment out next line
-    #map = maskMap(map, opts['decmin'], opts['decmax'])
+    if opts['mask']:
+        map = maskMap(map, opts['decmin'], opts['decmax'])
 
     return map
