@@ -175,6 +175,8 @@ if __name__ == "__main__":
             default='png', help='Output file extension')
     parser.add_argument('-v', '--verbose', action='store_true', dest='verbose',
             default=False, help='Verbose output')
+    parser.add_argument('--symmetric', action='store_true', dest='symmetric',
+            default=True, help='Using diverging colomap with symmetric bounds (i.e. 0=white)')
 
 
     args = parser.parse_args()
@@ -230,11 +232,19 @@ if __name__ == "__main__":
     min = float(args.min) if args.min else unmasked.min()
     max = float(args.max) if args.max else unmasked.max()
     # Make min-max symmetric for relative intensity maps
-    if args.mapName in ['relint','relint_err','signal','fit']:
+    # if args.mapName in ['relint','relint_err','signal','fit']:
+    #     if (min < 0.) and (max >= 0.) and (abs(min) <= abs(max)):
+    #         min = -max
+    #     if (min < 0.) and (max >= 0.) and (abs(min) >= abs(max)):
+    #         max = -min
+    if opts['symmetric']==True:
         if (min < 0.) and (max >= 0.) and (abs(min) <= abs(max)):
             min = -max
         if (min < 0.) and (max >= 0.) and (abs(min) >= abs(max)):
             max = -min
+        colormap = cmap_discretize(plt.get_cmap('seismic'),np.linspace(min,max,30))
+    else:
+        colormap = cmap_discretize(cmaps.viridis,np.linspace(min,max,20))
     if not args.min:
         args.min = '%.2f' % min
     if not args.max:
@@ -242,12 +252,12 @@ if __name__ == "__main__":
 
     # Setup colormap with option for threshold
     #colormap = plt.get_cmap('jet')
-    if args.mapName in ['relint','relint_err','signal','fit','single']:
-        #colormap = plt.get_cmap('seismic')
-        colormap = cmap_discretize(plt.get_cmap('seismic'),np.linspace(min,max,30))
-        #colormap = cmap_discretize(plt.get_cmap('coolwarm'),np.linspace(min,max,20))
-    else:
-        colormap = cmap_discretize(cmaps.viridis,np.linspace(min,max,20))
+    # if args.mapName in ['relint','relint_err','signal','fit','single']:
+    #     #colormap = plt.get_cmap('seismic')
+    #     colormap = cmap_discretize(plt.get_cmap('seismic'),np.linspace(min,max,30))
+    #     #colormap = cmap_discretize(plt.get_cmap('coolwarm'),np.linspace(min,max,20))
+    # else:
+    #     colormap = cmap_discretize(cmaps.viridis,np.linspace(min,max,20))
     #colormap = plt.get_cmap('jet')
     #colormap = plt.get_cmap('coolwarm')
     #colormap = cmaps.viridis
@@ -301,7 +311,7 @@ if __name__ == "__main__":
     labelDict.update({'data':'Data','bg':'Background'})
     labelDict.update({'relint_err':'Relative Intensity Error'})
     labelDict.update({'fit':'Multipole Fit (Relative Intensity)'})
-    labelDict.update({'single':'Single Map'})
+    labelDict.update({'single':'Multipole Fit (Relative Intensity)'})
     label = labelDict[args.mapName]
     if args.scale:
         label += ' [x 10$^{-%d}$]' % args.scale

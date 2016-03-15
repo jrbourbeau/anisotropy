@@ -92,8 +92,6 @@ def getHarmonicFitParams(x, y, l, sigmay=None):
     popt, pcov = curve_fit(fitfunc, x, y, p0=parm_init, sigma=sigmay)
     fitVals = fitfunc(x, *popt)
     ndof  = len(popt)
-    print('len(popt) = {}'.format(ndof))
-    print('len(y) = {}'.format(len(y)))
     if sigmay is not None:
         chi2 = (1. / (len(y)-ndof)) * sum((y - fitVals)**2 / sigmay**2)
     else:

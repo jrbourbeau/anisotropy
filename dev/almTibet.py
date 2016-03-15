@@ -23,7 +23,9 @@ if __name__ == "__main__":
     public_path = '/home/jbourbeau/public_html/figures/2Dfit'
     parser = argparse.ArgumentParser(description='Calculate anisotropy')
     parser.add_argument('--chi2', dest='chi2', default='RI', \
-        help='Chi-squared function to minimize [standard, d1d2, RI]')
+        help='Chi-squared function to minimize [standard, d1d2, RI, tibetonly]')
+    parser.add_argument('--dipole', dest='dipole', default=False, \
+        action='store_true', help='Only use dipole components')
     parser.add_argument('--nbins', dest='nbins', type=int, default=18, \
         help='Number of RA bins to be used in projection')
     parser.add_argument('-l','--lmax', dest='lmax', type=int, default=3, \
@@ -71,12 +73,22 @@ if __name__ == "__main__":
     for i in range(nsph):
         #fitmap += p[fitparams[i]] * norm_sphharm(lvals[i],mvals[i],vx,vy,vz)
         #fiterrmap += p[fiterrparams[i]] * norm_sphharm(lvals[i],mvals[i],vx,vy,vz)
-        fitmap += p[fitparams[i]] * normedSH[fitparams[i]]
-        fiterrmap += p[fiterrparams[i]] * normedSH[fitparams[i]]
+        if opts['dipole']:
+            if i > 0 and i <= 3:
+                print('fitparams[{}] = {}'.format(i,fitparams[i]))
+                fitmap += p[fitparams[i]] * normedSH[fitparams[i]]
+                fiterrmap += p[fiterrparams[i]] * normedSH[fitparams[i]]
+            else:
+                continue
+        else:
+            fitmap += p[fitparams[i]] * normedSH[fitparams[i]]
+            fiterrmap += p[fiterrparams[i]] * normedSH[fitparams[i]]
+
 
     # Write fitmap to file
-    fitsfile = 'fitmap_lmax{}_{}chi2.fits'.format(lmax,opts['chi2'])
+    fitsfile = 'fitmap_lmax{}_{}chi2_dipoleonly.fits'.format(lmax,opts['chi2'])
     hp.write_map('fitmaps/'+fitsfile,fitmap,coord='C')
+    sys.exit()
 
     # Get fitmap proj relint data points that Tibet would see
     opts.update({'lmax':3,'ramin':0.,'ramax':360.,'decmin':-30.,'decmax':90.})
@@ -104,17 +116,6 @@ if __name__ == "__main__":
     redChi2 = Chi2/18.
     print('\nChi2 = {}'.format(Chi2))
     print('redChi2 = {}\n'.format(redChi2))
-    # # Calculate chi-squared for RI fit
-    # deg2rad = np.pi/180.
-    # famp = lambda x, *p: sum([np.cos(deg2rad*(i+1)*(x-p[2*i+2])) \
-    #         for i in range(len(p)/2)])
-    # fphase = lambda x, *p: sum([p[2*i+1] * (i+1) * np.cos(deg2rad*(i+1)*(x-p[2*i+2])) \
-    #         for i in range(len(p)/2)])
-    # fiterr = famp(ra,*tibetpopt)**2*(tibetperr)**2 + fphase(ra,*tibetpopt)**2
-    # fitchi2 = sum((projRI - tibetprojRI)**2/(tibetperr)**2)
-    # redfitchi2 = fitchi2/11.
-    # print('\nChi2 = {}'.format(Chi2))
-    # print('redChi2 = {}\n'.format(redChi2))
 
     # Plot proj relint vs RA
     fig = plt.figure()

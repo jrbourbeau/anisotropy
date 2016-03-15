@@ -102,41 +102,41 @@ def norm_sphharm(l, m, vx, vy, vz):
         return (vx**2*(vx**2 - 3*vy**2) - vy**2*(3*vx**2-vy**2)) * 3/16. * sqrt(35/(pi))
     raise
 
-# Return the real Cartesian spherical harmonic for a given l, m
-def real_sphharm(l, m, vx, vy, vz):
-
-    if l==0 and m==0:
-        return 1.
-    if l==1 and m==-1:
-        return vy
-    if l==1 and m==0:
-        return vz
-    if l==1 and m==1:
-        return vx
-    if l==2 and m==-2:
-        return 2*vx*vy
-    if l==2 and m==-1:
-        return 2*vy*vz
-    if l==2 and m==0:
-        return sqrt(1/3.)*(3*vz**2 - 1.)
-    if l==2 and m==1:
-        return 2*vx*vz
-    if l==2 and m==2:
-        return (vx**2 - vy**2)
-    if l==3 and m==-3:
-        return (3*vx**2 - vy*vx) * vy
-    if l==3 and m==-2:
-        return sqrt(8/3.)*vx*vy*vz
-    if l==3 and m==-1:
-        return sqrt(3/5.)*(5*vz**2 - 1) * vy
-    if l==3 and m==0:
-        return sqrt(2/5.)*(vz**2 - 1) * vz
-    if l==3 and m==1:
-        return sqrt(3/5.)*(5*vz**2 - 1) * vx
-    if l==3 and m==2:
-        return sqrt(2/3.)*(vx**2 - vy**2) * vz
-    if l==3 and m==3:
-        return (vx**2 - 3*vy**2) * vx
+# # Return the real Cartesian spherical harmonic for a given l, m
+# def real_sphharm(l, m, vx, vy, vz):
+#
+#     if l==0 and m==0:
+#         return 1.
+#     if l==1 and m==-1:
+#         return vy
+#     if l==1 and m==0:
+#         return vz
+#     if l==1 and m==1:
+#         return vx
+#     if l==2 and m==-2:
+#         return 2*vx*vy
+#     if l==2 and m==-1:
+#         return 2*vy*vz
+#     if l==2 and m==0:
+#         return sqrt(1/3.)*(3*vz**2 - 1.)
+#     if l==2 and m==1:
+#         return 2*vx*vz
+#     if l==2 and m==2:
+#         return (vx**2 - vy**2)
+#     if l==3 and m==-3:
+#         return (3*vx**2 - vy*vx) * vy
+#     if l==3 and m==-2:
+#         return sqrt(8/3.)*vx*vy*vz
+#     if l==3 and m==-1:
+#         return sqrt(3/5.)*(5*vz**2 - 1) * vy
+#     if l==3 and m==0:
+#         return sqrt(2/5.)*(vz**2 - 1) * vz
+#     if l==3 and m==1:
+#         return sqrt(3/5.)*(5*vz**2 - 1) * vx
+#     if l==3 and m==2:
+#         return sqrt(2/3.)*(vx**2 - vy**2) * vz
+#     if l==3 and m==3:
+#         return (vx**2 - 3*vy**2) * vx
 
 
 ## Creates dipole and quadrupole fit map
@@ -228,7 +228,6 @@ def multifit(l, data, bg, alpha, **kwargs):
 
         if opts['chi2']=='standard' or opts['chi2']==None:
             f[0] = (df**2 / skymapVar).sum()
-        #f[0] = (df**2 / skymapVar).sum()+((amp-8.5e-4)/(0.2e-4))**2 +((phase-21.9)/(1.6))**2
         if opts['chi2']=='d1d2':
             amp, amp_err, phase, phase_err = getProjDipole(fit, **opts)
             d1 = amp*np.cos(phase*deg2rad)
@@ -237,6 +236,9 @@ def multifit(l, data, bg, alpha, **kwargs):
         if opts['chi2']=='RI':
             RA, RI, RAerr = getRIRAProj(fit,**opts)
             f[0] = (df**2 / skymapVar).sum()+(((RI-tibetRI)/tibetRIerr)**2).sum()
+        if opts['chi2']=='tibetonly':
+            RA, RI, RAerr = getRIRAProj(fit,**opts)
+            f[0] = (((RI-tibetRI)/tibetRIerr)**2).sum()
 
     # Setup minimizer
     minimizer = ROOT.TMinuit(nsph)
