@@ -46,106 +46,73 @@ def LMSignificance(nData, nBG, alpha, nData_wsq=None, nBG_wsq=None):
 
 
 # Return the real Cartesian spherical harmonic for a given l, m
-def norm_sphharm(l, m, vx, vy, vz):
-
-    if l==0 and m==0:
-        return 1/2. * sqrt(1/pi)
-    if l==1 and m==-1:
-        return vy * sqrt(3/(4*pi))
-    if l==1 and m==0:
-        return vz * sqrt(3/(4*pi))
-    if l==1 and m==1:
-        return vx * sqrt(3/(4*pi))
-    if l==2 and m==-2:
-        return vx*vy * 1/2. * sqrt(15/pi)
-    if l==2 and m==-1:
-        return vy*vz * 1/2. * sqrt(15/pi)
-    if l==2 and m==0:
-        return (3*vz**2 - 1.) * 1/4. * sqrt(5/pi)
-    if l==2 and m==1:
-        return vx*vz * 1/2. * sqrt(15/pi)
-    if l==2 and m==2:
-        return (vx**2 - vy**2) * 1/4. * sqrt(15/pi)
-    if l==3 and m==-3:
-        #return (3*vx**2 - vy*vx) * vy * 1/4. * sqrt(35/(2*pi))
-        return (3*vx**2 - vy**2) * vy * 1/4. * sqrt(35/(2*pi))
-    if l==3 and m==-2:
-        return vx*vy*vz * 1/2. * sqrt(105/pi)
-    if l==3 and m==-1:
-        return (5*vz**2 - 1) * vy * 1/4. * sqrt(21/(2*pi))
-    if l==3 and m==0:
-        #return (vz**2 - 1) * vz * 1/4. * sqrt(7/pi)
-        return (2*vz**2 - 3*vx**2 - 3*vy**2) * vz * 1/4. * sqrt(7/pi)
-    if l==3 and m==1:
-        return (5*vz**2 - 1) * vx * 1/4. * sqrt(21/(2*pi))
-    if l==3 and m==2:
-        return (vx**2 - vy**2) * vz * 1/4. * sqrt(105/pi)
-    if l==3 and m==3:
-        return (vx**2 - 3*vy**2) * vx * 1/4. * sqrt(35/(2*pi))
-    if l==4 and m==-4:
-        return (vx**2 - vy**2) * vx * vy * 3/4. * sqrt(35/(pi))
-    if l==4 and m==-3:
-        return (3*vx**2 - vy**2) * vy * vz * 3/4. * sqrt(35/(2*pi))
-    if l==4 and m==-2:
-        return (7*vz**2 - 1) * vx * vy * 3/4. * sqrt(5/(pi))
-    if l==4 and m==-1:
-        return (7*vz**2 - 3) * vy * vz * 3/4. * sqrt(5/(2*pi))
-    if l==4 and m==0:
-        return (35*vz**4 - 30*vz**2 + 3) * 3/16. * sqrt(1/(pi))
-    if l==4 and m==1:
-        return (7*vz**2 - 3) * vx * vz * 3/4. * sqrt(5/(2*pi))
-    if l==4 and m==2:
-        return (vx**2 - vy**2)*(7*vz**2-1) * 3/8. * sqrt(5/(pi))
-    if l==4 and m==3:
-        return (vx**2 - 3*vy**2) * vx * vz * 3/4. * sqrt(35/(2*pi))
-    if l==4 and m==4:
-        return (vx**2*(vx**2 - 3*vy**2) - vy**2*(3*vx**2-vy**2)) * 3/16. * sqrt(35/(pi))
-    raise
-
-# # Return the real Cartesian spherical harmonic for a given l, m
-# def real_sphharm(l, m, vx, vy, vz):
+# def norm_sphharm(l, m, vx, vy, vz):
 #
 #     if l==0 and m==0:
-#         return 1.
+#         return 1/2. * sqrt(1/pi)
 #     if l==1 and m==-1:
-#         return vy
+#         return vy * sqrt(3/(4*pi))
 #     if l==1 and m==0:
-#         return vz
+#         return vz * sqrt(3/(4*pi))
 #     if l==1 and m==1:
-#         return vx
+#         return vx * sqrt(3/(4*pi))
 #     if l==2 and m==-2:
-#         return 2*vx*vy
+#         return vx*vy * 1/2. * sqrt(15/pi)
 #     if l==2 and m==-1:
-#         return 2*vy*vz
+#         return vy*vz * 1/2. * sqrt(15/pi)
 #     if l==2 and m==0:
-#         return sqrt(1/3.)*(3*vz**2 - 1.)
+#         return (3*vz**2 - 1.) * 1/4. * sqrt(5/pi)
 #     if l==2 and m==1:
-#         return 2*vx*vz
+#         return vx*vz * 1/2. * sqrt(15/pi)
 #     if l==2 and m==2:
-#         return (vx**2 - vy**2)
+#         return (vx**2 - vy**2) * 1/4. * sqrt(15/pi)
 #     if l==3 and m==-3:
-#         return (3*vx**2 - vy*vx) * vy
+#         #return (3*vx**2 - vy*vx) * vy * 1/4. * sqrt(35/(2*pi))
+#         return (3*vx**2 - vy**2) * vy * 1/4. * sqrt(35/(2*pi))
 #     if l==3 and m==-2:
-#         return sqrt(8/3.)*vx*vy*vz
+#         return vx*vy*vz * 1/2. * sqrt(105/pi)
 #     if l==3 and m==-1:
-#         return sqrt(3/5.)*(5*vz**2 - 1) * vy
+#         return (5*vz**2 - 1) * vy * 1/4. * sqrt(21/(2*pi))
 #     if l==3 and m==0:
-#         return sqrt(2/5.)*(vz**2 - 1) * vz
+#         #return (vz**2 - 1) * vz * 1/4. * sqrt(7/pi)
+#         return (2*vz**2 - 3*vx**2 - 3*vy**2) * vz * 1/4. * sqrt(7/pi)
 #     if l==3 and m==1:
-#         return sqrt(3/5.)*(5*vz**2 - 1) * vx
+#         return (5*vz**2 - 1) * vx * 1/4. * sqrt(21/(2*pi))
 #     if l==3 and m==2:
-#         return sqrt(2/3.)*(vx**2 - vy**2) * vz
+#         return (vx**2 - vy**2) * vz * 1/4. * sqrt(105/pi)
 #     if l==3 and m==3:
-#         return (vx**2 - 3*vy**2) * vx
+#         return (vx**2 - 3*vy**2) * vx * 1/4. * sqrt(35/(2*pi))
+#     if l==4 and m==-4:
+#         return (vx**2 - vy**2) * vx * vy * 3/4. * sqrt(35/(pi))
+#     if l==4 and m==-3:
+#         return (3*vx**2 - vy**2) * vy * vz * 3/4. * sqrt(35/(2*pi))
+#     if l==4 and m==-2:
+#         return (7*vz**2 - 1) * vx * vy * 3/4. * sqrt(5/(pi))
+#     if l==4 and m==-1:
+#         return (7*vz**2 - 3) * vy * vz * 3/4. * sqrt(5/(2*pi))
+#     if l==4 and m==0:
+#         return (35*vz**4 - 30*vz**2 + 3) * 3/16. * sqrt(1/(pi))
+#     if l==4 and m==1:
+#         return (7*vz**2 - 3) * vx * vz * 3/4. * sqrt(5/(2*pi))
+#     if l==4 and m==2:
+#         return (vx**2 - vy**2)*(7*vz**2-1) * 3/8. * sqrt(5/(pi))
+#     if l==4 and m==3:
+#         return (vx**2 - 3*vy**2) * vx * vz * 3/4. * sqrt(35/(2*pi))
+#     if l==4 and m==4:
+#         return (vx**2*(vx**2 - 3*vy**2) - vy**2*(3*vx**2-vy**2)) * 3/16. * sqrt(35/(pi))
+#     raise
 
 
 ## Creates dipole and quadrupole fit map
 def multifit(l, data, bg, alpha, **kwargs):
+# def multifit(l, data, bg, alpha, **kwargs):
 
     defaults = {'params':False, 'out':False, 'verbose':False, \
                 'decmax':-25, 'decmin':-90, 'chi2': None}
-    opts = {k:kwargs[k] for k in kwargs if k in defaults}
+    # opts = {k:kwargs[k] for k in kwargs if k in defaults}
+    opts = kwargs.copy()
     opts.update({k:defaults[k] for k in defaults if k not in opts})
+    print('opts = {}'.format(opts))
 
     # Useful breakdown of l, m values to be used
     nsph = sum([2*l_i+1 for l_i in range(l+1)])
@@ -164,7 +131,6 @@ def multifit(l, data, bg, alpha, **kwargs):
     # Cut to desired dec range (equiv to healpy zenith range)
     deg2rad = np.pi / 180
     npix  = len(data)
-    #print('npix = {}'.format(npix))
     nside = hp.npix2nside(npix)
     theta, phi = hp.pix2ang(nside, range(npix))
     thetamax = (90-opts['decmin']) * deg2rad
@@ -173,26 +139,6 @@ def multifit(l, data, bg, alpha, **kwargs):
     skymap[np.logical_not(pass_dec_cut)] = 0
     skymapVar[np.logical_not(pass_dec_cut)] = np.inf
     ndata = pass_dec_cut.sum()
-    #print('pass_dec_cut = {}'.format(pass_dec_cut.sum()))
-
-    # Restrict range to desired zenith angles
-    '''minZ = opts['decmin'] * deg2rad
-    maxZ = opts['decmax'] * deg2rad
-    vx, vy, vz = hp.pix2vec(nside, [i for i in range(npix)])
-    zcut = (vz >= minZ) * (vz <= maxZ)
-    skymap[np.logical_not(zcut)] = 0
-    skymapVar[np.logical_not(zcut)] = np.inf
-    ndata = zcut.sum()'''
-    #print('zcut = {}'.format(zcut.sum()))
-
-    # Original chi-squared function
-    # Chi-squared function to minimize for fit
-    def chi2(npar, derivatives, f, par, internal_flag):
-        fit = np.zeros(len(vx))
-        for i in range(len(lvals)):
-            fit += par[i] * norm_sphharm(lvals[i], mvals[i], vx, vy, vz)
-        df = skymap - fit
-        f[0] = (df**2 / skymapVar).sum()
 
     # Chi-squared function to minimize with Tibet dipole
     # Tibet measurements for the amp and phase
@@ -219,7 +165,7 @@ def multifit(l, data, bg, alpha, **kwargs):
     normedSH = normedSH.item()
     fitparams = ['Y(%i,%i)' % (lvals[i], mvals[i]) for i in range(nsph)]
     fiterrparams = ['dY(%i,%i)' % (lvals[i], mvals[i]) for i in range(nsph)]
-    def chi2Tibet(npar, derivatives, f, par, internal_flag):
+    def chi2(npar, derivatives, f, par, internal_flag):
         fit = np.zeros(len(vx))
         for i in range(len(lvals)):
             #fit += par[i] * norm_sphharm(lvals[i], mvals[i], vx, vy, vz)
@@ -242,22 +188,27 @@ def multifit(l, data, bg, alpha, **kwargs):
 
     # Setup minimizer
     minimizer = ROOT.TMinuit(nsph)
-    minimizer.SetFCN(chi2Tibet)
+    minimizer.SetFCN(chi2)
     error_code = ROOT.Long(0)
     minimizer.mnexcm("SET PRINTOUT", np.array([-1]), 1, error_code)
     # minimizer.mnexcm("SET PRINTOUT", np.array([3]), 1, error_code)
 
-    #fitparams = ['Y(%i,%i)' % (lvals[i], mvals[i]) for i in range(nsph)]
-    #fiterrparams = ['dY(%i,%i)' % (lvals[i], mvals[i]) for i in range(nsph)]
+    step = opts['step']
+    init = opts['init']
     for i, p in enumerate(fitparams):
-        #minimizer.mnparm(i, p, 0., 1e-6, -1e6, 1e6, error_code)
-        minimizer.mnparm(i, p, 1e-9, 1e-6, -1e6, 1e6, error_code)
+        minimizer.mnparm(i, p, init, step, -1e6, 1e6, error_code)
+        # minimizer.mnparm(i, p, 0., 1e-6, -1e6, 1e6, error_code)
+        # minimizer.mnparm(i, p, 1e-12, 1e-6, -1e6, 1e6, error_code)
 
     # Iterate MIGRAD up to 1000 times
     minimizer.mnexcm("SET STR", np.array([2]), 1, error_code)
     minimizer.mnexcm("MIGRAD", np.array([2000]), 1, error_code)
 
     # Extract best fit parameters
+    if opts['chi2']=='RI':
+        ndata += 18
+    if opts['chi2']=='tibetonly':
+        ndata = 18
     p = getFitParams(minimizer, fitparams, ndata)
     #print('p = {}'.format(p))
     #np.save('/home/jbourbeau/anisotropy/dev/typedSHparms_lmax_2.npy', p)
@@ -276,26 +227,8 @@ def multifit(l, data, bg, alpha, **kwargs):
     fiterrmap = np.zeros(len(vx))
     for i in range(nsph):
         #fitmap += p[fitparams[i]] * norm_sphharm(lvals[i],mvals[i],vx,vy,vz)
-        #fiterrmap += p[fiterrparams[i]] * norm_sphharm(lvals[i],mvals[i],vx,vy,vz)
         fitmap += p[fitparams[i]] * normedSH[fitparams[i]]
         fiterrmap += p[fiterrparams[i]] * normedSH[fitparams[i]]
-
-    # Plot relative intensity vs right ascension
-    # comment decmin/decmax in this section for Tibet
-    #opts['decmin'] = -90.
-    #opts['decmax'] = -25.
-    #opts['plot'] = True
-    #amp, amp_err, phase, phase_err = getProjDipole(fitmap,fiterrmap, **opts)
-    #print('\nDipole = {}'.format(amp*10**4))
-    #print('Phase = {} \n'.format(phase))
-    '''d1 = amp*np.cos(phase*deg2rad)
-    d2 = amp*np.sin(phase*deg2rad)
-
-    df = skymap - fitmap
-    chi2_IC_term = (df**2 / skymapVar).sum()
-    chi2_tibet_term = (d1-d1_tibet)**2/(d1_var) +(d2-d2_tibet)**2/(d2_var)
-    print('\nchi2_IC_term = {}'.format(chi2_IC_term))
-    print('chi2_tibet_term = {} \n'.format(chi2_tibet_term))'''
 
     if opts['out']:
         hp.write_map(out, fitmap)
@@ -316,6 +249,8 @@ def getFitParams(minimizer, fitparams, ndata):
     p['chi2'] = amin
     p['ndof'] = ndof
     p['prob'] = prob
+    p['nvpar'] = nvpar
+    p['ierr'] = ierr
 
     for i, par in enumerate(fitparams):
         p[par], p['d'+par] = ROOT.Double(0), ROOT.Double(0)
@@ -333,13 +268,12 @@ def getFitParams(minimizer, fitparams, ndata):
 ## Ouput parameters from dipole/quadrupole fit
 def outputFit(p, fitparams, scale):
 
-    print '\nchi2/ndf = %.1f / %d = %.4f' % (p['chi2'], p['ndof'],p['chi2']/float(p['ndof']))
+    print '\nchi2/ndf = %.1f / %d = %.4f' % (p['chi2'], p['ndof'], p['chi2']/float(p['ndof']))
     print '\nprob = %.2e' % (p['prob'])
-    print 'Fit values (x %d):' % scale
+    print '\nierr = {}'.format(p['ierr'])
+    print '\nFit values (x %d):' % scale
     for par in fitparams:
         print ' %s = %.3f +/- %.3f' % (par, scale*p[par], scale*p['d'+par])
-    #for par in fitparams:
-    #    print ' %.3f %.3f' % (scale*p[par], scale*p['d'+par])
 
 
 # Takes in data, bg & dipole-quadrupole maps and creates false data map

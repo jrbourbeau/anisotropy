@@ -15,7 +15,7 @@ import argparse
 import os, re, sys
 import healpy as hp
 
-from mapfunctions.mapFunctions import getMap, multifit, norm_sphharm, smoothMap
+from mapfunctions.mapFunctions import getMap, multifit, smoothMap
 from mapfunctions.projFunctions import *
 
 if __name__ == "__main__":
@@ -35,6 +35,10 @@ if __name__ == "__main__":
     parser.add_argument('-f','--file', dest='file',\
         default='/data/user/jbourbeau/anisotropy/maps/merged/IC_24H_sid_4-4.25GeV.fits',
         help='.fits file to be analyzed')
+    parser.add_argument('--step', dest='step', type=float, \
+        help='TMinuit initial step size or uncertainty')
+    parser.add_argument('--init', dest='init', type=float, \
+        help='TMinuit initial parameter value')
 
     args = parser.parse_args()
     kwargs = vars(args).copy()
@@ -44,37 +48,40 @@ if __name__ == "__main__":
     opts = {k:kwargs[k] for k in kwargs if k not in defaults}
     opts.update({k:defaults[k] for k in defaults if k not in opts})
     # print('opts = {}'.format(opts))
-    # data, bg, local = hp.read_map(opts['file'], range(3), verbose=False)
+    # data, bg, local = hp.read_m   ap(opts['file'], range(3), verbose=False)
     data = getMap(*[opts['file']], mapName='data', **opts)
     bg = getMap(*[opts['file']], mapName='bg', **opts)
 
     # Get chi2 minimized alm parameters
     lmax = opts['lmax']
     opts['verbose'] = True
-    fitparams, fiterrparams, p = multifit(lmax, data, bg, 1/20., **opts)
-    #np.save('SHcomparison/new_params_{}chi2_lmax_{}.npy'.format(opts['chi2'],lmax), p)
-    #np.save('SHcomparison/old_params_{}chi2_lmax_{}.npy'.format(opts['chi2'],lmax), p)
-    #sys.exit()
-
-    # Create SH fit to relint map from alm values
-    npix = len(data)
-    nside = hp.npix2nside(npix)
-    vx, vy, vz = hp.pix2vec(nside, [i for i in range(npix)])
     # Useful breakdown of l, m values to be used
     nsph = sum([2*l_i+1 for l_i in range(lmax+1)])
     lvals = [[l_i]*(2*l_i+1) for l_i in range(lmax+1)]
     mvals = [[m for m in range(-l_i, l_i+1)] for l_i in range(lmax+1)]
     lvals = [item for sublist in lvals for item in sublist]
     mvals = [item for sublist in mvals for item in sublist]
+    fitparams, fiterrparams, p = multifit(lmax, data, bg, 1/20., **opts)
+    # fitparams = ['Y(%i,%i)' % (lvals[i], mvals[i]) for i in range(nsph)]
+    # fiterrparams = ['dY(%i,%i)' % (lvals[i], mvals[i]) for i in range(nsph)]
+    # p = np.load('SHcoeff/{}chi2_lmax_{}.npy'.format(opts['chi2'],lmax))
+    # p = p.item()
+    np.save('SHCoeff{}_{}/{}chi2_lmax_{}.npy'.format(opts['init'], opts['step'], opts['chi2'],lmax), p)
+    sys.exit()
+
+    # Create SH fit to relint map from alm values
+    # npix = len(data)
+    # nside = hp.npix2nside(npix)
+    nside = 64
+    npix = hp.nside2npix(nside)
+    vx, vy, vz = hp.pix2vec(nside, [i for i in range(npix)])
     normedSH = np.load('/home/jbourbeau/anisotropy/dev/normedSH.npy')
     normedSH = normedSH.item()
     fitmap = np.zeros(npix)
     fiterrmap = np.zeros(npix)
     for i in range(nsph):
-        #fitmap += p[fitparams[i]] * norm_sphharm(lvals[i],mvals[i],vx,vy,vz)
-        #fiterrmap += p[fiterrparams[i]] * norm_sphharm(lvals[i],mvals[i],vx,vy,vz)
         if opts['dipole']:
-            if i > 0 and i <= 3:
+            if fitparams[i]=='Y(1,1)' or fitparams[i]=='Y(1,-1)':
                 print('fitparams[{}] = {}'.format(i,fitparams[i]))
                 fitmap += p[fitparams[i]] * normedSH[fitparams[i]]
                 fiterrmap += p[fiterrparams[i]] * normedSH[fitparams[i]]
@@ -86,12 +93,12 @@ if __name__ == "__main__":
 
 
     # Write fitmap to file
-    fitsfile = 'fitmap_lmax{}_{}chi2_dipoleonly.fits'.format(lmax,opts['chi2'])
+    fitsfile = 'fitmap_lmax{}_{}chi2_dipole2.fits'.format(lmax,opts['chi2'])
     hp.write_map('fitmaps/'+fitsfile,fitmap,coord='C')
     sys.exit()
 
     # Get fitmap proj relint data points that Tibet would see
-    opts.update({'lmax':3,'ramin':0.,'ramax':360.,'decmin':-30.,'decmax':90.})
+    opts.update({'lmax':1,'ramin':0.,'ramax':360.,'decmin':-30.,'decmax':90.})
     #ra, ri, ra_err, ri_err = getRIRAProj(fitmap, fiterrmap, **opts)
     ra, ri, ra_err = getRIRAProj(fitmap, **opts)
     # Get fitmap dipole amp and phase that Tibet would see
@@ -139,8 +146,8 @@ if __name__ == "__main__":
     plt.plot(tibetRA,cosFit(tibetRA,*tibetpopt[:3]),color='green',
         label='Tibet Dipole Fit')
     plt.legend()
-    #plt.show()
+    plt.show()
     #ax.annotate(r'Standard $\chi^2$', xy=(150, -0.008))
     #ax.annotate(r'Dipole = {:1.1e}$\pm${:1.1e}'.format(amp,amp_err), xy=(150, -0.010))
     #ax.annotate(r'Phase = {:2.1f}$\pm${:1.1f}'.format(phase,phase_err), xy=(150, -0.012))
-    plt.savefig('/home/jbourbeau/public_html/figures/2Dfit/tibet_relint_lmax{}_{}chi2.png'.format(lmax,opts['chi2']), dpi=300, bbox_inches='tight')
+    # plt.savefig('/home/jbourbeau/public_html/figures/2Dfit/tibet_relint_lmax{}_{}chi2.png'.format(lmax,opts['chi2']), dpi=300, bbox_inches='tight')
