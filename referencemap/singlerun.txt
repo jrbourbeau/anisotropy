@@ -1,0 +1,1 @@
+/data/ana/CosmicRay/Anisotropy/IceCube/IC86-2012/simple-dst/ic86_simpleDST_2012-06-10.root

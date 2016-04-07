@@ -9,7 +9,7 @@ import argparse
 from mapFunctions import getMap
 import os, re, sys
 import colormaps as cmaps
-from plotFunctions import cmap_discretize
+# from plotFunctions import cmap_discretize
 
 
 def SetupAbsThresholdColormap(amin, amax, threshold):
@@ -242,9 +242,12 @@ if __name__ == "__main__":
             min = -max
         if (min < 0.) and (max >= 0.) and (abs(min) >= abs(max)):
             max = -min
-        colormap = cmap_discretize(plt.get_cmap('seismic'),np.linspace(min,max,30))
+        # colormap = cmap_discretize(plt.get_cmap('seismic'),np.linspace(min,max,30))
+        # colormap = plt.get_cmap('seismic')
+        colormap = cmaps.viridis
     else:
-        colormap = cmap_discretize(cmaps.viridis,np.linspace(min,max,20))
+        colormap = cmaps.viridis
+        # colormap = cmap_discretize(cmaps.viridis,np.linspace(min,max,20))
     if not args.min:
         args.min = '%.2f' % min
     if not args.max:

@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
-#==============================================================================
+#============================================================================
 # File Name     : almTibet.py
 # Description   : Optimization code for spherical harmonic fitting of
 #                 relint skymaps from IceCube using Tibet data
 # Creation Date : 03-04-2016
 # Last Modified : Thu 03 Mar 2016 04:16:49 PM CST
 # Created By    : James Bourbeau
-#==============================================================================
+#============================================================================
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -66,8 +66,8 @@ if __name__ == "__main__":
     # fiterrparams = ['dY(%i,%i)' % (lvals[i], mvals[i]) for i in range(nsph)]
     # p = np.load('SHcoeff/{}chi2_lmax_{}.npy'.format(opts['chi2'],lmax))
     # p = p.item()
-    np.save('SHCoeff{}_{}/{}chi2_lmax_{}.npy'.format(opts['init'], opts['step'], opts['chi2'],lmax), p)
-    sys.exit()
+    # np.save('SHCoeff{}_{}/{}chi2_lmax_{}.npy'.format(opts['init'], opts['step'], opts['chi2'],lmax), p)
+    # sys.exit()
 
     # Create SH fit to relint map from alm values
     # npix = len(data)
