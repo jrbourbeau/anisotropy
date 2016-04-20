@@ -100,7 +100,7 @@ int main(int argc, char* argv[]){
 		cout << "\nVerision 2.0 of TimeScramble.\n" << endl;
 		return 1;
 	}
-	
+
 	// Check for all necessary parameters
 	vector<string> option_keys;
 	option_keys.push_back("outbase");
@@ -113,7 +113,7 @@ int main(int argc, char* argv[]){
 			cerr << "\nUsage: " << option_keys[i] << " parameter not defined.\n";
 			return 1;
 		}
-		if (variables_map["method"].as<string>()!= "Sidereal" && variables_map["method"].as<string>()!= "Anti" 
+		if (variables_map["method"].as<string>()!= "Sidereal" && variables_map["method"].as<string>()!= "Anti"
 			&& variables_map["method"].as<string>()!= "Solar" && variables_map["method"].as<string>()!= "Extended") {
 			cerr << "\n Invalid method parameter '" << variables_map["method"].as<string>() << "' entered...\n" << endl;
 			return 1;
@@ -128,7 +128,7 @@ int main(int argc, char* argv[]){
 	}
 	string fileList;
 	vector<string> inFiles;	// inFile is vector containing names of input files to be analyzed
-	if (variables_map.count("batch_idx")){ 
+	if (variables_map.count("batch_idx")){
 		int batch_idx = atoi(variables_map["batch_idx"].as<string>().c_str());
 		for (int i = 0; i < batch_idx; ++i){
 			getline(batch_file, fileList);
@@ -144,14 +144,14 @@ int main(int argc, char* argv[]){
 	}
 	else {
 		while(getline(batch_file, fileList)){
-			inFiles.push_back(fileList);			
+			inFiles.push_back(fileList);
 		}
 	}
 	batch_file.close();
-	
+
 	cout << "\nInput file(s) are: " << endl;
 	for (size_t i = 0; i < inFiles.size(); ++i) cout << inFiles[i] << endl;
-	
+
 	if (variables_map.count("ebins")) {
 		vector<string> test = variables_map["ebins"].as< vector<string> >();
 		cout << "\nEbin values:" << endl;
@@ -165,7 +165,7 @@ int main(int argc, char* argv[]){
 		for (size_t i = 0; i < test.size(); ++i) cout << " " << test[i];
 		cout << endl;
 	}
-	
+
 	if (variables_map.count("comp")) {
 		vector<string> test = variables_map["comp"].as< vector<string> >();
 		cout << "Comp bin values:" << endl;
@@ -184,13 +184,13 @@ int main(int argc, char* argv[]){
 		//TimeScramble(variables_map, inFiles[i], datapath);
 		TimeScramble(variables_map, inFiles[i]);
 	}
-	
+
 	return 0;
 }
 
 void TimeScramble(po::variables_map variables_map, string inFile) {
 //void TimeScramble(po::variables_map variables_map, string inFile, string datapath) {
-	
+
 	/*TStopwatch timer;
 	timer.Start();*/
 
@@ -270,7 +270,7 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 
 	stringstream sstr;
 	sstr.str("");
-	
+
 	// Determine date from the input_file name
 	//
 	// IMPORTANT: FILES MUST END WITH "yyyy-mm-dd.root"!!!!
@@ -296,7 +296,7 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 	string month_prev = date_prev.substr(date_prev.find('/')+1, 2);
 	string day_prev = date_prev.substr(date_prev.find('/')+4, 2);
 	string yyyymmdd_prev = year_prev + "-" + month_prev + "-" + day_prev;
-	
+
 	string file_prev = inbase + yyyymmdd_prev + ".root";
 	//if ((detector=="IT") && (year_prev!=year) && (detector!="IT81-III")) {
 	//	idx0 = file_prev.find('/'+year+'/') + 1;
@@ -352,7 +352,7 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 
 	//cout << "Number of chained files: " << cutDST->GetNtrees() << endl;
 
-	Long64_t nEntries = cutDST->GetEntries();	// Sum of number of entriesfor each TTree in the TChain 
+	Long64_t nEntries = cutDST->GetEntries();	// Sum of number of entriesfor each TTree in the TChain
 	vector<Long64_t> nEvents(nMaps, 0);
 	vector<Long64_t> nUsedEvents(nMaps, 0);
 
@@ -374,7 +374,7 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 	mjd1 = mjd_input_file;
 	mjd2 = mjd1 + 1;
 	startMJD = mjd1;
-	
+
 	// Setup histograms for storing time information
 	vector<TH1D*> histMJD(nMaps);
 	const char* histName;
@@ -388,12 +388,12 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 	// Track the local coordinates
 	vector< vector<Double_t> > LocCoord_theta(nMaps);
 	vector< vector<Double_t> > LocCoord_phi(nMaps);
-	
+
 	double percent_completed_indicator = 0;
 	int progress_bar_width = 70;
-	
+
 	for (Long64_t jentry = 0; jentry < nEntries; ++jentry) {
-		
+
 		cutDST->GetEntry(jentry);
 
 		// Print progress bar to the console
@@ -420,8 +420,8 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 		}
 
 		// Basic time check
-		if (dst.ModJulDay < mjd1) continue;	
-		
+		if (dst.ModJulDay < mjd1) continue;
+
 		//
 		// Additional checks on data
 		//
@@ -437,7 +437,7 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 			if (not temp)
 			pass_cuts = false;
 		}
-		
+
 		// Energy cuts for IceTop and IceCube
 		if (detector == "IT" && variables_map.count("ebins")) mapIdx = ITenergyCut(variables_map, dst, ebins);
 		if (variables_map.count("spline"))	mapIdx = ICenergyCut(variables_map, dst, table, zenith, ebins);
@@ -462,10 +462,10 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 			time.SetTime(dst.ModJulDay);
 			local.SetLocalRad(zenith, azimuth);
 			if (method == "Anti") eqApparent = ice.LocalToEquatorial_FromAntiSid(local, time);
-			//if (method == "Extended") eqApparent = ice.LocalToEquatorial_FromExtendedSid(local, time);
+			if (method == "Extended") eqApparent = ice.LocalToEquatorial_FromExtendedSid(local, time);
 			if (method == "Sidereal") eqApparent = ice.LocalToEquatorial(local, time);
 			if (method == "Solar") eqApparent = ice.LocalToEquatorial_FromSolar(local, time);
-			
+
 			// Write to map
 			sphereDir.theta = pi/2. - eqApparent.GetDecRad();
 			sphereDir.phi = eqApparent.GetRaRad();
@@ -531,11 +531,11 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 					LocalMap[mEntry][i] += LocalMapInt[mEntry][i];
 				}
 			}	// End of mEntry loop
-			
+
 			//cout << "jentry : " << jentry << endl;
 			jentry = jentry - 1;
 			startMJD += dt;
-			
+
 			if (startMJD + second >= mjd2) break;
 			else {
 				cout << "new startMJD :" << setprecision(12) << startMJD << endl;
@@ -575,7 +575,7 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 		if (variables_map.count("overwrite") && boost::filesystem::exists(outfile_path)){
 			boost::filesystem::remove(outfile_path);
 		}
-		
+
 		fitshandle fitsOut;
 		fitsOut.create(sstr.str().c_str());
 
@@ -589,8 +589,8 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 	// Clean up
 	delete cutDST;
 
-	// To avoid messages like "Warning in <TROOT::Append>: Replacing existing TH1: histMJD_0 (Potential memory leak)"	
-	// This might lead to some errors...not sure yet. 
+	// To avoid messages like "Warning in <TROOT::Append>: Replacing existing TH1: histMJD_0 (Potential memory leak)"
+	// This might lead to some errors...not sure yet.
 	for (unsigned int i=0; i < nMaps; ++i) delete histMJD[i];
 
 	/*timer.Stop();
@@ -638,7 +638,7 @@ int ICenergyCut(po::variables_map variables_map, SimpleDST dst, splinetable t, d
 	// Get energy bin
 	int ebin = 0;
 	while (median > ebins[ebin+1]) ebin += 1;
-	
+
 	return ebin;
 }
 
@@ -698,4 +698,3 @@ int ITs125Cut(po::variables_map variables_map, SimpleDST dst, vector<float> sbin
 
 	return sbin;
 }
-

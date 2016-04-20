@@ -5,7 +5,8 @@ trunk verison of healpix-cxx from:
 http://code.icecube.wisc.edu/svn/projects/healpix-cxx/trunk/
 
 astro from:
-http://code.icecube.wisc.edu/projects/icecube/browser/IceCube/sandbox/cfinley/astro/trunk
+<!-- http://code.icecube.wisc.edu/projects/icecube/browser/IceCube/sandbox/cfinley/astro/trunk -->
+http://code.icecube.wisc.edu/svn/sandbox/fmcnally/astro/
 
 
 

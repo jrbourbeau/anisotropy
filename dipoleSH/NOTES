@@ -1,0 +1,4 @@
+Scanned over inital parameter value and initial step size in multifit. 
+Found that (according to reduced chi2) the optimal params are:
+	init = 1e-15
+	step = 1e-06

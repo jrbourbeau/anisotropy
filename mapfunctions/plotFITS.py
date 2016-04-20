@@ -243,8 +243,9 @@ if __name__ == "__main__":
         if (min < 0.) and (max >= 0.) and (abs(min) >= abs(max)):
             max = -min
         # colormap = cmap_discretize(plt.get_cmap('seismic'),np.linspace(min,max,30))
+        colormap = plt.get_cmap('jet')
         # colormap = plt.get_cmap('seismic')
-        colormap = cmaps.viridis
+        # colormap = cmaps.viridis
     else:
         colormap = cmaps.viridis
         # colormap = cmap_discretize(cmaps.viridis,np.linspace(min,max,20))

@@ -16,7 +16,8 @@ ICETRAY_LIBS  = $(shell icetray-config astro healpix-cxx --ldflags)
 #SPLINE_LIBS    = $(ICEREC)/build/lib/libphotospline.so
 #SPLINE_FLAGS   = -I$(ICEREC)/src/photospline/public
 
-ICEREC = /data/user/jbourbeau/offline-software-2/V04-08-00
+ICEREC = /data/user/jbourbeau/offline/V04-08-00
+# ICEREC = /data/user/jbourbeau/offline-software-2/V04-08-00
 SPLINE_LIBS    = -L$(ICEREC)/build/lib -lphotospline
 SPLINE_FLAGS   = -I$(ICEREC)/src/photospline/public
 
@@ -40,4 +41,4 @@ timeScramble: TimeScramble.o SimpleDST.o
 	$(CXX) $(CXXFLAGS) -c $^
 
 clean:
-	rm -f *.o a.out timeScramble 
+	rm -f *.o a.out timeScramble
