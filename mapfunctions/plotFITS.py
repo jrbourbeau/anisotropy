@@ -10,6 +10,7 @@ from mapFunctions import getMap
 import os, re, sys
 import colormaps as cmaps
 # from plotFunctions import cmap_discretize
+from plotFunctions import diverge_map
 
 
 def SetupAbsThresholdColormap(amin, amax, threshold):
@@ -243,8 +244,10 @@ if __name__ == "__main__":
         if (min < 0.) and (max >= 0.) and (abs(min) >= abs(max)):
             max = -min
         # colormap = cmap_discretize(plt.get_cmap('seismic'),np.linspace(min,max,30))
-        colormap = plt.get_cmap('jet')
+        # colormap = plt.get_cmap('jet')
         # colormap = plt.get_cmap('seismic')
+        colormap = plt.get_cmap('RdBu_r')
+        # colormap = diverge_map(high=('#A00000'),low=('#3F54C0'))
         # colormap = cmaps.viridis
     else:
         colormap = cmaps.viridis
@@ -304,10 +307,15 @@ if __name__ == "__main__":
     hp.graticule(verbose=False)
 
     if args.gplane:
-        print 'YAY'
-        theta = [0.]*100
-        phi = np.arange(0, 360, 3.6)
-        hp.projplot(theta, phi, 'r-', coord='G')
+        theta = np.pi/2 * np.ones(100)
+        phi = np.arange(0, 360, 3.6) * np.pi/180.
+        #hp.projscatter(theta, phi, coord='G')
+        hp.projplot(theta, phi, 'k--', coord='G')
+        hp.projplot(np.pi/2, 0, 'k^', coord='G')
+        #hp.projscatter(np.pi/2, 0, coord='G')
+        #hp.projscatter(np.pi/2, np.pi/2., coord='G')
+        #hp.projscatter(np.pi/2, np.pi, coord='G')
+        #hp.projscatter(np.pi/2, 3/2.*np.pi, coord='G')
 
     # Set up the color bar
     labelDict = {'relint':'Relative Intensity'}

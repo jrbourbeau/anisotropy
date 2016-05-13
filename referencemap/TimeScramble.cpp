@@ -51,7 +51,6 @@ const Double_t millisecond = 1e-3 * second;
 const Double_t microsecond = 1e-6 * second;
 
 void TimeScramble(po::variables_map variables_map, string inFile);
-//void TimeScramble(po::variables_map variables_map, string inFile, string datapath);
 bool FilterCut(po::variables_map variables_map, SimpleDST dst);
 int ITenergyCut(po::variables_map variables_map, SimpleDST dst, vector<float> ebins);
 int ITcompCut(po::variables_map variables_map, SimpleDST dst, vector<string> cbins);
@@ -69,7 +68,6 @@ int main(int argc, char* argv[]){
 	// NOTE: boost version can't parse multiple multitoken options.
 	// Multiple infiles workaround by reading infiles from text file
 	//("infiles", po::value< vector<string> >()->multitoken(),"")
-	//("datapath", po::value<string>(), "Path to directory containing root files to be analyzed")
 	("batchfile", po::value<string>(), "Text file with input root filenames")
 	("batch_idx", po::value<string>(), "Line number to read in txt file")
 	("outbase", po::value<string>(), "Base name for outfile")
@@ -173,15 +171,8 @@ int main(int argc, char* argv[]){
 		cout << endl;
 	}
 
-	/*string datapath;
-	if (variables_map.count("datapath")) {
-		datapath = variables_map["datapath"].as<string>();
-	}*/
-
 	for (size_t i = 0; i < inFiles.size(); ++i) {
-		//cout << "\nInput file is: " << datapath+inFiles[i] << endl;
 		cout << "\nInput file is: " << inFiles[i] << endl;
-		//TimeScramble(variables_map, inFiles[i], datapath);
 		TimeScramble(variables_map, inFiles[i]);
 	}
 
@@ -189,7 +180,6 @@ int main(int argc, char* argv[]){
 }
 
 void TimeScramble(po::variables_map variables_map, string inFile) {
-//void TimeScramble(po::variables_map variables_map, string inFile, string datapath) {
 
 	/*TStopwatch timer;
 	timer.Start();*/
@@ -303,7 +293,6 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 	//	file_prev.replace(idx0, 4, year_prev);
 	//}
 	ifstream ifile_prev(file_prev.c_str());
-	//ifstream ifile_prev((datapath+file_prev).c_str());
 	if(!ifile_prev.is_open()){	// Check that ifile_prev was able to be opened
 		cerr << "Couldn't open ifile_prev" << endl;
 	}
@@ -321,10 +310,8 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 //		file_post.replace(idx0, 4, year_post);
 //	}
 	ifstream ifile_post(file_post.c_str());
-	//ifstream ifile_post((datapath+file_post).c_str());
 	if(!ifile_post.is_open()){	// Check that ifile_post was able to be opened
 		cout << "ifile_post = " << file_post.c_str() << endl;
-		//cout << "ifile_post = " << (datapath+file_post).c_str() << endl;
 		cerr << "Couldn't open ifile_post" << endl;
 	}
 
@@ -336,15 +323,12 @@ void TimeScramble(po::variables_map variables_map, string inFile) {
 	TChain *cutDST = new TChain(masterTree);
 	if (ifile_prev) {
 		cutDST->Add(file_prev.c_str());
-		//cutDST->Add((datapath+file_prev).c_str());
 		cout << "Open TChain: " << yyyymmdd_prev.c_str() << endl;
 	}
 	cutDST->Add(inFile.c_str());
-	//cutDST->Add((datapath+inFile).c_str());
 	cout << "Open TChain: " << yyyymmdd.c_str() << endl;
 	if (ifile_post) {
 		cutDST->Add(file_post.c_str());
-		//cutDST->Add((datapath+file_post).c_str());
 		cout << "Open TChain: " << yyyymmdd_post.c_str() << endl;
 	}
 
